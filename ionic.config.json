@@ -1,0 +1,7 @@
+{
+  "name": "sunnysitesvuejs",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
