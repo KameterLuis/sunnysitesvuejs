@@ -1,0 +1,14 @@
+.loader {
+    animation: fadeout 0s forwards;
+}
+  
+@keyframes fadeout {
+0% {
+    opacity: 1;
+} 80% {
+    opacity: 1;
+} 100% {
+    opacity: 0;
+    visibility: hidden;
+}
+}
