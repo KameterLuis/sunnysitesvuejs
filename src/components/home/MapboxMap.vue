@@ -3,6 +3,7 @@
 </template>
   
 <script setup>
+import BuildingShadows from '@/utils/BuildingShadows';
 import mapboxgl from 'mapbox-gl';
 import { onMounted, ref } from 'vue';
 
@@ -10,6 +11,8 @@ const mapContainer = ref(null);
 let map = null;
 let longitude = ref(0);
 let latitude = ref(0);
+let currentDateTime = new Date();
+let buildingShadows = null;
 
 const setCoordinates = (newLongitude, newLatitude) => {
     longitude.value = newLongitude;
@@ -24,6 +27,7 @@ const setDate = (date) => {
 };
 
 onMounted(() => {
+    console.log('MapboxMap mounted'); // Debugging line
     mapboxgl.accessToken = 'pk.eyJ1IjoibG9raTkxOSIsImEiOiJjbG1xNjF6amEwMGRzMm9ycjk4cnRiNHVrIn0.-zmJ-2xdZoqBOjAgc8taiA';
     map = new mapboxgl.Map({
         container: mapContainer.value,
@@ -31,6 +35,7 @@ onMounted(() => {
         center: [longitude.value, latitude.value],
         zoom: 16
     });
+    buildingShadows = new BuildingShadows(new Date());
 
     map.on('load', () => {
         map.removeLayer('building');
@@ -47,8 +52,15 @@ onMounted(() => {
                 'fill-extrusion-opacity': 1
             }
         }, 'road-label');
+        map.addLayer(buildingShadows, '3d-buildings');
         map.resize();
     });
+
+    map.on('resize', () => {
+        map.removeLayer('building-shadows');
+        map.addLayer(buildingShadows, '3d-buildings');
+    });
+
 
 });
 

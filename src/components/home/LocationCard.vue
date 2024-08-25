@@ -1,5 +1,5 @@
 <template>
-    <div class="shadow-sunny rounded-xl w-[200px] bg-white p-[15px]">
+    <div class="shadow-sunny rounded-xl w-[200px] bg-white p-[15px] border-[1px]">
         <p class="-text--sunny-gray">{{ title }}</p>
         <div class="w-[170px] mt-3">
             <img :src="getImageUrl()" :alt="title">
@@ -9,9 +9,6 @@
 </template>
 
 <style>
-ion-icon {
-    color: var(--sunny-orange)
-}
 </style>
 
 <script setup>
