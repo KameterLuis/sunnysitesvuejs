@@ -1,10 +1,11 @@
 <template>
     <div id="map" ref="mapContainer" style="width: 100%; height: 100%;"></div>
 </template>
-  
+
 <script setup>
 import BuildingShadows from '@/utils/BuildingShadows';
 import mapboxgl from 'mapbox-gl';
+
 import { onMounted, ref } from 'vue';
 
 const mapContainer = ref(null);

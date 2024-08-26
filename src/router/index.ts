@@ -7,7 +7,7 @@ import Settings from '../views/Settings.vue';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/home'
+    redirect: '/login'//home
   },
   {
     path: '/home',

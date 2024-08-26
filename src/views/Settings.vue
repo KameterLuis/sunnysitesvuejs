@@ -1,7 +1,11 @@
 <template>
-    <ion-page>
-        <ion-content>
-            <h1>Settings</h1>
-        </ion-content>
-    </ion-page>
+    <div class="px-8 pt-10">
+        <p class="text-2xl">Settings</p>
+    </div>
 </template>
+
+<style>
+p {
+    color: var(--sunny-gray);
+}
+</style>
