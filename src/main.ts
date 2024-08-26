@@ -3,7 +3,7 @@ import App from './App.vue';
 import './index.css';
 import router from './router';
 
-import { IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonicVue, IonImg, IonPage, IonRow, IonTitle, IonToolbar } from '@ionic/vue';
+import { IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonContent, IonDatetime, IonDatetimeButton, IonGrid, IonHeader, IonIcon, IonicVue, IonImg, IonModal, IonPage, IonRange, IonRow, IonTitle, IonToolbar } from '@ionic/vue';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -71,6 +71,10 @@ const app = createApp(App)
   app.component('ion-card-header', IonCardHeader);
   app.component('ion-img', IonImg);
   app.component('ion-avatar', IonAvatar);
+  app.component('ion-datetime-button', IonDatetimeButton);
+  app.component('ion-datetime', IonDatetime);
+  app.component('ion-modal', IonModal);
+  app.component('ion-range', IonRange);
 
 router.isReady().then(() => {
   app.mount('#app');

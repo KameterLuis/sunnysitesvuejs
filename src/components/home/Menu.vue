@@ -36,6 +36,7 @@
         <div class="overflow-y-scroll overflow-x-hidden h-full">
             <Recommendations v-if="showRecommendations" />
             <Weather v-if="showWeather" />
+            <Timelapse v-if="showTimelapse" />
         </div>
     </div>
 </template>
@@ -49,6 +50,7 @@
 <script setup>
 import { ref } from 'vue';
 import Recommendations from './Recommendations.vue';
+import Timelapse from './Timelapse.vue';
 import Weather from './Weather.vue';
 
 const menu = ref();

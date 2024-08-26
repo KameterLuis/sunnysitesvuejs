@@ -1,6 +1,6 @@
 <template>
     <div class="scroll-container w-screen mt-2">
-        <div v-if="weather?.list" class="space-x-4 px-8 -text--sunny-gray">
+        <div v-if="weather?.list" class="space-x-4 px-6 -text--sunny-gray">
           <div class="flex items-center rounded-xl shadow-lg border-[1px] px-4">
             <!--ion-icon name="sunny" size="large"></ion-icon-->
             <div class="-ml-4">
@@ -16,13 +16,13 @@
             </div>
           </div>
         </div>
-        <div v-if="weather?.list" class="flex items-center px-8 mt-4">
+        <div v-if="weather?.list" class="flex items-center px-6 mt-4">
           <div class="-text--sunny-gray w-full">
-            <div class="flex justify-between w-full md:justify-start md:space-x-4">
-              <div class="flex items-center rounded-lg shadow-lg border-[1px] p-5 py-6">
-                <p class="text-2xl drop-shadow-lg">{{ weather.list[0].main.temp }} °C</p>
+            <div class="flex justify-between w-full md:justify-start space-x-4">
+              <div class="flex items-center justify-center w-[35%] rounded-lg shadow-lg border-[1px] px-3 py-6">
+                <p class="text-2xl drop-shadow-lg">{{ Math.round(weather.list[0].main.temp) }} °C</p>
               </div>
-              <div class="flex flex-col text-base items-center rounded-xl shadow-lg border-[1px] p-5 py-6">
+              <div class="flex flex-col w-[65%] text-base items-center rounded-xl shadow-lg border-[1px] px-3 py-6">
                 <div>
                   <div class="flex items-center space-x-2">
                     <ion-icon class="icon-gray" name="sunny" size="small"></ion-icon>
@@ -37,7 +37,7 @@
             </div>
           </div>
         </div>
-        <div v-if="weather?.list" class="-text--sunny-gray space-y-4 px-8 mt-4 pb-32">
+        <div v-if="weather?.list" class="-text--sunny-gray space-y-4 px-6 mt-4 pb-32">
           <WeatherCard :weather="getWeatherInDays(weather.list, 4)[0]" />
           <WeatherCard :weather="getWeatherInDays(weather.list, 4)[1]" />
           <WeatherCard :weather="getWeatherInDays(weather.list, 4)[2]" />
@@ -94,5 +94,4 @@ const getWeatherInDays = (weather, days) => {
 
 const {weather, fetchWeather, getWeatherImageUrl} = useWeather();
 onMounted(fetchWeather);
-//f74de1584a0fd4074b6e26aaee24aae0 for openweather.org
 </script>

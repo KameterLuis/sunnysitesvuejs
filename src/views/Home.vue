@@ -10,7 +10,7 @@
         </div>
         <div class="relative w-full h-screen overflow-hidden">
           <div class="w-full h-screen -z-50">
-            <!--MapboxMap ref="mapboxMap" /-->
+            <MapboxMap ref="mapboxMap" />
           </div>
         </div>
       </div>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-//import MapboxMap from '@/components/home/MapboxMap.vue';
+import MapboxMap from '@/components/home/MapboxMap.vue';
 import Menu from '@/components/home/Menu.vue';
 import SideBar from '@/components/home/SideBar.vue';
 import { onMounted, ref } from 'vue';

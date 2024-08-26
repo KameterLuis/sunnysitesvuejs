@@ -7,7 +7,7 @@
             {{ getDateDay(weather.dt) }}
         </p>
         <p class="drop-shadow-lg">
-            {{ weather.main.temp }} °C
+            {{ Math.round(weather.main.temp) }} °C
         </p>
     </div>
 </template>
