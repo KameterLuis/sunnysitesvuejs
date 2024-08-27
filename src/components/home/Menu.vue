@@ -34,7 +34,7 @@
             </button>
         </div>
         <div class="overflow-y-scroll overflow-x-hidden h-full">
-            <Recommendations v-if="showRecommendations" />
+            <Recommendations @goToLocation2="goToLocation2" v-if="showRecommendations" />
             <Weather v-if="showWeather" />
             <Timelapse v-if="showTimelapse" />
         </div>
@@ -48,10 +48,27 @@
 </style>
 
 <script setup>
-import { ref } from 'vue';
+import { Geolocation } from '@capacitor/geolocation';
+import { defineEmits, ref } from 'vue';
 import Recommendations from './Recommendations.vue';
 import Timelapse from './Timelapse.vue';
 import Weather from './Weather.vue';
+
+const emit = defineEmits(['goToLocation3']);
+
+const goToLocation2 = (location) => {
+    emit('goToLocation3', location);
+}
+
+const setLocation = async () => {
+    const coordinates = await Geolocation.getCurrentPosition();
+    const long = coordinates.coords.longitude;
+    const lat = coordinates.coords.latitude;
+    emit('goToLocation3', {
+        _long: long,
+        _lat: lat
+    });
+}
 
 const menu = ref();
 const locationBtn = ref();
@@ -62,8 +79,4 @@ const recommendationBtn = ref();
 const showTimelapse = ref(false);
 const showWeather = ref(false);
 const showRecommendations = ref(false);
-
-function setLocation() {
-
-}
 </script>

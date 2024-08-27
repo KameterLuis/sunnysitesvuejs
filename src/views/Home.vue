@@ -24,7 +24,7 @@
           </div>
         </div>
         <div class="fixed z-50 bottom-0 w-full">
-          <Menu />
+          <Menu @goToLocation3="goToLocation3" />
         </div>
         <div class="relative w-full h-screen overflow-hidden">
           <div class="w-full h-screen -z-50">
@@ -83,7 +83,9 @@ const onSearch = (event) => {
     if(!result) return;
     searchResults.value = result.features;
   });
-  
-  //mapboxMap.value.setCoordinates();
 };
+
+const goToLocation3 = (location) => {
+  mapboxMap.value.setCoordinates(location._long, location._lat);
+}
 </script>
