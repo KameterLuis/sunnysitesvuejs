@@ -4,9 +4,7 @@
       <img src="@/assets/splash/Logo.jpg" alt="Logo">
     </div>  
   </div>
-  <ion-app>
-    <ion-router-outlet />
-  </ion-app>
+  <router-view />
 </template>
 
 <style>
@@ -14,5 +12,26 @@
 </style>
 
 <script setup lang="ts">
-import { IonApp, IonRouterOutlet } from '@ionic/vue';
+
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const user = ref<User | null>(null);
+const router = useRouter();
+
+onMounted(() => {
+  const auth = getAuth();
+  onAuthStateChanged(auth, (currentUser) => {
+    if(currentUser) {
+      user.value = currentUser;
+    } else {
+      const currentRoute = router.currentRoute.value.name;
+      if((currentRoute != "Login") && (currentRoute != "Register")) {
+        //router.push('/login');
+      }
+    }
+  })
+})
+
 </script>

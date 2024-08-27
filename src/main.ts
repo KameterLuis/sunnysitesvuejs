@@ -1,6 +1,6 @@
-import { IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonContent, IonDatetime, IonDatetimeButton, IonGrid, IonHeader, IonIcon, IonicVue, IonImg, IonItem, IonModal, IonPage, IonRange, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/vue';
+import { IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonContent, IonDatetime, IonDatetimeButton, IonGrid, IonHeader, IonIcon, IonicVue, IonImg, IonInput, IonItem, IonModal, IonPage, IonRange, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/vue';
 import { createApp } from 'vue';
-import { VueFire } from 'vuefire';
+import { VueFire, VueFireAuth } from 'vuefire';
 import App from './App.vue';
 import { firebaseApp } from './firebaseConfig';
 import './index.css';
@@ -55,7 +55,9 @@ const app = createApp(App)
   .use(router)
   .use(VueFire, {
     firebaseApp,
-    modules: []
+    modules: [
+      VueFireAuth()
+    ]
   })
 
 app.component('ion-page', IonPage);
@@ -83,6 +85,7 @@ app.component('ion-modal', IonModal);
 app.component('ion-range', IonRange);
 app.component('ion-searchbar', IonSearchbar);
 app.component('ion-item', IonItem);
+app.component('ion-input', IonInput);
 
 router.isReady().then(() => {
   app.mount('#app');

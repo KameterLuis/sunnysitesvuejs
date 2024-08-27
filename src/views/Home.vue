@@ -5,6 +5,12 @@
         <div class="absolute z-50 right-6 top-6">
           <div v-if="showSearchBar" class="fixed w-full left-0 px-8">
             <ion-searchbar @ionInput="onSearch" color="light" placeholder="Location"></ion-searchbar>
+            <div v-for="(place, index) in searchResults" :key="searchResults.id" class="px-3">
+              <div :id="index" @click="searchLocation" class="bg-gray-100 px-4 py-4 rounded-lg mb-4 shadow-lg">
+                <p class="text-lg">{{ place.text }}</p>
+                <p class="text-xs">{{ place.place_name }}</p>
+              </div>
+            </div>
           </div>
           <div class="drop-shadow-lg">
             <ion-button @click="showSearchBar = !showSearchBar" size="large" color="light" shape="round">
@@ -22,7 +28,7 @@
         </div>
         <div class="relative w-full h-screen overflow-hidden">
           <div class="w-full h-screen -z-50">
-            <!--MapboxMap ref="mapboxMap" /-->
+            <MapboxMap ref="mapboxMap"/>
           </div>
         </div>
       </div>
@@ -45,26 +51,39 @@
 </style>
 
 <script setup>
-//import MapboxMap from '@/components/home/MapboxMap.vue';
+import MapboxMap from '@/components/home/MapboxMap.vue';
 import Menu from '@/components/home/Menu.vue';
+import { getLocation } from '@/utils/geolocation.service';
 import { onMounted, ref } from 'vue';
 import Settings from './Settings.vue';
 
 const showSearchBar = ref(false);
 const showSettings = ref(false);
 const mapboxMap = ref(null);
+const searchResults = ref(null);
 
 onMounted(() => {
   if (mapboxMap.value) {
     mapboxMap.value.setCoordinates(11.5, 48.1);
   }
-  /*getLocation('munich').then((result) => {
-    console.log(result);
-  });*/
 });
 
+const searchLocation = (event) => {
+  if(!event || !event.target) return;
+  let elm = event.target;
+  if(elm.nodeName == 'P') elm = elm.parentNode;
+  showSearchBar.value = false;
+  const coords = searchResults.value[elm.id].center;
+  mapboxMap.value.setCoordinates(coords[0], coords[1]);
+}
+
 const onSearch = (event) => {
-  if(!event || !event.value) return;
-  mapboxMap.value.setCoordinates();
+  if(!event || !event.detail) return;
+  getLocation(event.detail.value).then((result) => {
+    if(!result) return;
+    searchResults.value = result.features;
+  });
+  
+  //mapboxMap.value.setCoordinates();
 };
 </script>

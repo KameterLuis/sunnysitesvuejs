@@ -4,41 +4,28 @@
             <img src="@/assets/splash/Logo.png" alt="Logo">
         </div>
         <div class="mt-auto w-full flex flex-col items-center mb-32">
-            <p class="text-lg text-black">Login or sign up for free</p>
+            <p class="text-lg text-black">Create a new account</p>
             <ion-item class="mt-8 w-full">
                 <ion-input v-model="email" type="email" class="-text--sunny-gray" label="Email" label-placement="floating" fill="outline" placeholder="max@mustermann.com"></ion-input>
             </ion-item>
             <ion-item class="mt-4 w-full">
                 <ion-input v-model="password" type="password" class="-text--sunny-gray" label="Password" label-placement="floating" fill="outline" placeholder="*****"></ion-input>
             </ion-item>
-            <p v-if="errMsg" class="mt-4 text-base">{{ errMsg }}</p>
             <div class="w-full mt-8">
-                <div @click="login" class="w-full -bg--sunny-orange py-4">
+                <div @click="register" class="w-full -bg--sunny-orange py-4">
                     <p class="text-white text-center">CONTINUE</p>
                 </div>
-                <div @click="goToRegister" class="w-full bg-white border-2 -border--sunny-orange py-4 mt-4">
-                    <p class="-text--sunny-orange text-center">REGISTER</p>
+                <div @click="goToLogin" class="w-full bg-white border-2 -border--sunny-orange py-4 mt-4">
+                    <p class="-text--sunny-orange text-center">BACK TO LOGIN</p>
                 </div>
-                <div class="w-full bg-gray-300 h-[1px] mt-4"></div>
-                <div @click="loginGoogle" class=" px-4 flex w-full mt-4 bg-white border-[1px] -border--sunny-gray py-4">
-                    <div class="relative w-[25px] h-[25px]">
-                        <img src="@/assets/login/google.png" alt="Google">
-                    </div>
-                    <p class="-text--sunny-gray text-center w-full -ml-[25px]">Login with Google</p>
-                </div>
-                <div @click="loginApple" class=" px-4 flex w-full mt-4 bg-white border-[1px] -border--sunny-gray py-4">
-                    <div class="relative w-[25px] h-[25px]">
-                        <img src="@/assets/login/apple.png" alt="Google">
-                    </div>
-                    <p class="-text--sunny-gray text-center w-full -ml-[25px]">Login with Apple</p>
-                </div>
+                <div class="w-full bg-gray-300 h-[1px] mt-6"></div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFirebaseAuth } from 'vuefire';
@@ -47,13 +34,12 @@ const auth = useFirebaseAuth();
 
 const email = ref('');
 const password = ref('');
-const errMsg = ref();
 const router = useRouter();
 
-const login = () => {
-    signInWithEmailAndPassword(getAuth(), email.value, password.value)
+const register = () => {
+    createUserWithEmailAndPassword(getAuth(), email.value, password.value)
         .then((data) => {
-            console.log("Successfully signed in!");
+            console.log("Successfully registered!");
             router.push("/home");
         })
         .catch((error) => {
@@ -63,11 +49,11 @@ const login = () => {
 }
 
 const signInWithGoogle = () => {
-
+    
 }
 
-const goToRegister = () => {
-    router.push('/register');
+const goToLogin = () => {
+    router.push('/login');
 };
 
 onMounted(() => {
