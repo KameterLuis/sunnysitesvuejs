@@ -1,4 +1,4 @@
-import { IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonContent, IonDatetime, IonDatetimeButton, IonGrid, IonHeader, IonIcon, IonicVue, IonImg, IonInput, IonItem, IonModal, IonPage, IonRange, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/vue';
+import { IonAlert, IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCol, IonContent, IonDatetime, IonDatetimeButton, IonGrid, IonHeader, IonIcon, IonicVue, IonImg, IonInput, IonItem, IonModal, IonPage, IonRange, IonRow, IonSearchbar, IonTitle, IonToast, IonToolbar } from '@ionic/vue';
 import { createApp } from 'vue';
 import { VueFire, VueFireAuth } from 'vuefire';
 import App from './App.vue';
@@ -37,7 +37,7 @@ import '@ionic/vue/css/palettes/dark.system.css';
 import './theme/variables.css';
 
 import { addIcons } from 'ionicons';
-import { cafe, cafeOutline, closeOutline, cloudyNight, location, searchOutline, settingsOutline, stopwatch, storefrontOutline, sunny } from 'ionicons/icons';
+import { cafe, cafeOutline, closeOutline, cloudyNight, documentTextOutline, location, lockClosedOutline, logOutOutline, notificationsOutline, searchOutline, settingsOutline, stopwatch, storefrontOutline, sunny } from 'ionicons/icons';
 
 addIcons({
   'search-outline': searchOutline,
@@ -49,7 +49,11 @@ addIcons({
   'sunny': sunny,
   'close-outline': closeOutline,
   'storefront-outline': storefrontOutline,
-  'cafe-outline': cafeOutline
+  'cafe-outline': cafeOutline,
+  'log-out-outline': logOutOutline,
+  'lock-closed-outline': lockClosedOutline,
+  'notifications-outline': notificationsOutline,
+  'document-text-outline': documentTextOutline,
 })
 
 const app = createApp(App)
@@ -88,6 +92,8 @@ app.component('ion-range', IonRange);
 app.component('ion-searchbar', IonSearchbar);
 app.component('ion-item', IonItem);
 app.component('ion-input', IonInput);
+app.component('ion-toast', IonToast);
+app.component('ion-alert', IonAlert);
 
 router.isReady().then(() => {
   app.mount('#app');

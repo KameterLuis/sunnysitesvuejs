@@ -53,6 +53,8 @@ import { useCollection } from 'vuefire';
 import { db } from '../../firebaseConfig';
 import LocationCard from './LocationCard.vue';
 
+console.log(db);
+
 const restaurantsRef = collection(db, 'Restaurants');
 const restaurants = useCollection(restaurantsRef);
 

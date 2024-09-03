@@ -20,6 +20,7 @@ const setCoordinates = (newLongitude, newLatitude) => {
     latitude.value = newLatitude;
     if (map) {
         map.setCenter([longitude.value, latitude.value]);
+        map.transform.zoom = 18;
     }
 };
 

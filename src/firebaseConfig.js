@@ -2,13 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBEAwHQr8icOI-Ct348J1RZCGzCzEokH2g",
-  authDomain: "sunnysites-ba2ce.firebaseapp.com",
-  projectId: "sunnysites-ba2ce",
-  storageBucket: "sunnysites-ba2ce.appspot.com",
-  messagingSenderId: "1032381624180",
-  appId: "1:1032381624180:web:43bc712864bdc11982c621",
-  measurementId: "G-SE60F7JMVC",
+  apiKey: "AIzaSyBLYrNuqvZco_bGB6C_yOcJkIjYgWh1l7I",
+  authDomain: "sunny-sites-517e5.firebaseapp.com",
+  projectId: "sunny-sites-517e5",
+  storageBucket: "sunny-sites-517e5.appspot.com",
+  messagingSenderId: "321699843935",
+  appId: "1:321699843935:web:c14c692842cd273109f0ea",
+  measurementId: "G-BHB9RT8Q6H",
 };
 
 const firebaseApp = initializeApp(firebaseConfig);

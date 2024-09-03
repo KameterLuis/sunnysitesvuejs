@@ -45,5 +45,12 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to show nearby services.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need your location even when the app is running in the background.</string>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>We need to send you notifications to keep you informed.</string>
+
 </dict>
 </plist>

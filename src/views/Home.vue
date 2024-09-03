@@ -4,7 +4,7 @@
       <div class="relative w-full h-full">
         <div class="absolute z-50 right-6 top-6">
           <div v-if="showSearchBar" class="fixed w-full left-0 px-8">
-            <ion-searchbar @ionInput="onSearch" color="light" placeholder="Location"></ion-searchbar>
+            <ion-searchbar class="custom" @ionInput="onSearch" placeholder="Location"></ion-searchbar>
             <div v-for="(place, index) in searchResults" :key="searchResults.id" class="px-3">
               <div :id="index" @click="searchLocation" class="bg-gray-100 px-4 py-4 rounded-lg mb-4 shadow-lg">
                 <p class="text-lg">{{ place.text }}</p>
@@ -13,12 +13,12 @@
             </div>
           </div>
           <div class="drop-shadow-lg">
-            <ion-button @click="showSearchBar = !showSearchBar" size="large" color="light" shape="round">
+            <ion-button @click="showSearchBar = !showSearchBar" size="large" shape="round">
                 <ion-icon class="icon-sidebar-gray" slot="icon-only" size="small" name="search-outline"></ion-icon>
             </ion-button>
           </div>
           <div class="drop-shadow-lg">
-            <ion-button @click="showSettings = true" size="large" color="light" shape="round">
+            <ion-button @click="showSettings = true" size="large" shape="round">
                 <ion-icon class="icon-sidebar-gray" slot="icon-only" size="small" name="settings-outline"></ion-icon>
             </ion-button>
           </div>
@@ -35,7 +35,7 @@
       <div v-if="showSettings" class="fixed left-0 top-0 w-full h-full bg-white z-[50]">
         <Settings />
         <div class="absolute right-6 top-6 drop-shadow-lg">
-          <ion-button @click="showSettings = false" size="large" color="light" shape="round">
+          <ion-button @click="showSettings = false" size="large" shape="round">
               <ion-icon class="icon-sidebar-gray" slot="icon-only" size="small" name="close-outline"></ion-icon>
           </ion-button>
         </div>
