@@ -24,7 +24,7 @@
           </div>
         </div>
         <div class="fixed z-50 bottom-0 w-full">
-          <Menu @goToLocation3="goToLocation3" />
+          <Menu @goToLocation3="goToLocation3" @updateDate="handleDateChange" />
         </div>
         <div class="relative w-full h-screen overflow-hidden">
           <div class="w-full h-screen -z-50">
@@ -61,6 +61,10 @@ const showSearchBar = ref(false);
 const showSettings = ref(false);
 const mapboxMap = ref(null);
 const searchResults = ref(null);
+
+const handleDateChange = (newDate) => {
+    mapboxMap.value.setDate(newDate);
+};
 
 onMounted(() => {
   if (mapboxMap.value) {

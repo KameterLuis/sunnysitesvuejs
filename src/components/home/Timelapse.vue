@@ -30,7 +30,7 @@ ion-range {
 </style>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { defineEmits, onMounted, ref } from 'vue';
 
 const timelapseDateTime = ref(new Date());
 const displayDateTime = ref(new Date());
@@ -56,6 +56,12 @@ const updateRangeValue = () => {
     formatDisplayTime();
 }
 
+const emit = defineEmits(['updateTime']);
+
+const changeTime = (dateTime) => {
+    emit('updateTime', dateTime);
+}
+
 onMounted(updateRangeValue);
 
 const onDateChange = (event) => {
@@ -64,6 +70,7 @@ const onDateChange = (event) => {
   timelapseDateTime.value.setFullYear(newDate.getFullYear());
   timelapseDateTime.value.setMonth(newDate.getMonth());
   formatDisplayTime();
+  changeTime(timelapseDateTime.value);
 }
 
 const onRangeChange = (event) => {
@@ -74,6 +81,7 @@ const onRangeChange = (event) => {
     newTime.setHours(hours, minutes);
     timelapseDateTime.value = newTime;
     formatDisplayTime();
+    changeTime(timelapseDateTime.value);
 }
 
 </script>

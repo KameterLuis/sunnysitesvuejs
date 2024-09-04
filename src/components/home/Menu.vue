@@ -36,7 +36,7 @@
         <div class="overflow-y-scroll overflow-x-hidden h-full">
             <Recommendations @goToLocation2="goToLocation2" v-if="showRecommendations" />
             <Weather v-if="showWeather" />
-            <Timelapse v-if="showTimelapse" />
+            <Timelapse v-if="showTimelapse" @updateTime="handleDateChange" />
         </div>
     </div>
 </template>
@@ -54,7 +54,12 @@ import Recommendations from './Recommendations.vue';
 import Timelapse from './Timelapse.vue';
 import Weather from './Weather.vue';
 
-const emit = defineEmits(['goToLocation3']);
+const emit = defineEmits(['goToLocation3', 'updateDate']);
+
+const handleDateChange = (newDate) => {
+    console.log("MENUUU");
+    emit('updateDate', newDate);
+};
 
 const goToLocation2 = (location) => {
     emit('goToLocation3', location);
