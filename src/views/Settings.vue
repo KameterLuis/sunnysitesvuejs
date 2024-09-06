@@ -7,13 +7,28 @@
                 <SettingsButton @click="handlePwChange" text="Change password" icon="lock-closed-outline" />
                 <SettingsButton @click="handleSignOut" text="Sign out" icon="log-out-outline" />
                 <SettingsButton @click="setOpen(true)" text="Delete account" icon="close-outline" />
-                <p class="mt-6">General</p>
-                <SettingsButton text="Disable Notifications" icon="notifications-outline" />
+                <p class="mt-6 hidden">General</p>
+                <SettingsButton class="hidden" text="Disable Notifications" icon="notifications-outline" />
                 <p class="mt-6">About</p>
-                <SettingsButton text="Privacy Policy" icon="document-text-outline" />
-                <SettingsButton text="Imprint" icon="document-text-outline" />
+                <SettingsButton @click="openModal('privacy')" text="Privacy Policy" icon="document-text-outline" />
+                <SettingsButton @click="openModal('imprint')" text="Imprint" icon="document-text-outline" />
             </div>
         </div>
+        <ion-modal :is-open="isModalOpen">
+            <ion-header>
+                <ion-toolbar>
+                <ion-buttons slot="start">
+                    <ion-button @click="closeModal">Close</ion-button>
+                </ion-buttons>
+                <ion-title>{{ modalTitle }}</ion-title>
+                </ion-toolbar>
+            </ion-header>
+            <ion-content>
+                <div class="px-4">
+                    <p>{{ modalContent }}</p>
+                </div>
+            </ion-content>
+        </ion-modal>
     </div>
     <ion-alert
         :is-open="isOpen"
@@ -49,7 +64,32 @@ p {
 import SettingsButton from '@/components/settings/Button.vue';
 import router from "@/router";
 import { getAuth, sendPasswordResetEmail, signOut } from "firebase/auth";
+import { doc } from 'firebase/firestore';
 import { ref } from 'vue';
+import { useDocument } from 'vuefire';
+import { db } from '../firebaseConfig';
+
+const legalRef = doc(db, 'Legal', 'iV8EPKXn0nWLZ4fmLzKV');
+const legalTexts = useDocument(legalRef);
+
+const modalTitle = ref('');
+const modalContent = ref('');
+const isModalOpen = ref(false);
+
+const openModal = (type) => {
+  if (type === 'privacy') {
+    modalTitle.value = 'Privacy Policy';
+    modalContent.value = legalTexts.value?.privacy || 'No privacy policy available';
+  } else if (type === 'imprint') {
+    modalTitle.value = 'Imprint';
+    modalContent.value = legalTexts.value?.imprint || 'No imprint available';
+  }
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
 
 const alertButtons = [
     {

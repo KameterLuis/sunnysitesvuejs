@@ -22,7 +22,7 @@
                         <p class="-text--sunny-orange text-center">REGISTER</p>
                     </div>
                     <div class="w-full bg-gray-300 h-[1px] mt-4"></div>
-                    <div @click="signInWithGoogle" class=" px-4 flex w-full mt-4 bg-white border-[1px] -border--sunny-gray py-4">
+                    <div @click="signInWithGoogle" class="px-4 flex w-full mt-4 bg-white border-[1px] -border--sunny-gray py-4">
                         <div class="relative w-[25px] h-[25px]">
                             <img src="@/assets/login/google.png" alt="Google">
                         </div>

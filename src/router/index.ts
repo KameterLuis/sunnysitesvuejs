@@ -48,7 +48,7 @@ const getCurrentUser = () => {
   })
 }
 
-router.beforeEach(async (to, from, next) => {
+/*router.beforeEach(async (to, from, next) => {
   if(to.matched.some((record) => record.meta.requiresAuth)) {
     if(await getCurrentUser()) {
       next();
@@ -58,6 +58,6 @@ router.beforeEach(async (to, from, next) => {
   } else {
     next();
   }
-});
+});*/
 
 export default router

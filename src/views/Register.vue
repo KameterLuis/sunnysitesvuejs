@@ -60,7 +60,10 @@ const register = () => {
                     toastMessage.value = "Incorrect password";
                     break;
                 default:
-                    toastMessage.value = "Email or password incorrect";
+                    toastMessage.value = "Email incorrect";
+                    if(password.value.length < 6) {
+                        toastMessage.value = "Passwort too short";
+                    }
                     break;
             }
             showToast.value = true;

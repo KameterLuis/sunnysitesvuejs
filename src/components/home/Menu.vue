@@ -73,6 +73,9 @@ const setLocation = async () => {
         _long: long,
         _lat: lat
     });
+    showTimelapse.value = false;
+    showWeather.value = false;
+    showRecommendations.value = false;
 }
 
 const menu = ref();
