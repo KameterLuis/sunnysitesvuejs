@@ -57,7 +57,6 @@ import Weather from './Weather.vue';
 const emit = defineEmits(['goToLocation3', 'updateDate']);
 
 const handleDateChange = (newDate) => {
-    console.log("MENUUU");
     emit('updateDate', newDate);
 };
 
