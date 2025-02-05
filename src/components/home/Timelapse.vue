@@ -1,15 +1,21 @@
 <template>
     <div class="scroll-container w-screen mt-2">
-      <div class="flex flex-col items-center space-x-4 mt-4 px-8 w-full">
-        <p class="text-xl -text--sunny-gray text-center w-full">Date and Time</p>  
-        <ion-datetime-button class="mt-6" datetime="datetime"></ion-datetime-button>
+      <div class="flex flex-col items-center space-x-4 px-8 w-full">
+        <div class="flex items-center mt-2">
+          <ion-datetime-button datetime="datetime"></ion-datetime-button>
+          <p class="text-black text-base bg-[rgba(0,0,0,0.07)] px-2 py-[5px] rounded-lg">{{ displayDateTime }} Uhr</p>
+        </div>
         <ion-modal :keep-contents-mounted="true">
-          <ion-datetime @ionChange="onDateChange" locale="de-DE" :value="timelapseDateTime.toISOString()" id="datetime"></ion-datetime>
+          <ion-datetime ref="datetime" presentation="date" @ionChange="onDateChange" locale="de-DE" :value="timelapseDateTime.toISOString()" id="datetime">
+            <ion-buttons slot="buttons">
+              <ion-button color="danger" @click="reset()">Reset</ion-button>
+              <ion-button color="primary" @click="confirm()">Confirm</ion-button>
+            </ion-buttons>
+          </ion-datetime>
         </ion-modal>
         <div class="w-full mt-6">
           <ion-range aria-label="Time" min="36" max="276" :value="rangeValue" step="1" @ionInput="onRangeChange"></ion-range>
         </div>
-        <p class="mt-2 -text--sunny-gray">{{ displayDateTime }} Uhr</p>
       </div>
     </div>
 </template>
@@ -36,14 +42,24 @@ const timelapseDateTime = ref(new Date());
 const displayDateTime = ref(new Date());
 const rangeValue = ref(0);
 
+const datetime = ref();
+
+const reset = () => {
+  datetime.value.$el.reset();
+}
+
+const confirm = () => {
+  datetime.value.$el.confirm();
+}
+
 const singleNumberToDouble = (num) => {
   return num >= 10 ? num : "0" + num;
 }
 
 const formatDisplayTime = () => {
   let date = timelapseDateTime.value;
-  const offset = date.getTimezoneOffset() * 60000;
-  date = new Date(date.getTime() + offset);
+  //const offset = date.getTimezoneOffset() * 60000;
+  //date = new Date(date.getTime() + offset);
   const currentHours = singleNumberToDouble(date.getHours());
   const currentMinutes = singleNumberToDouble(date.getMinutes());
   displayDateTime.value = `${currentHours}:${currentMinutes}`;
@@ -59,7 +75,7 @@ const updateRangeValue = () => {
 const emit = defineEmits(['updateTime']);
 
 const changeTime = (dateTime) => {
-    emit('updateTime', dateTime);
+  emit('updateTime', dateTime);
 }
 
 onMounted(updateRangeValue);

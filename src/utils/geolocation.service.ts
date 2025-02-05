@@ -4,6 +4,8 @@ const access_token = 'pk.eyJ1IjoibG9raTkxOSIsImEiOiJjbG1xNjF6amEwMGRzMm9ycjk4cnR
 let rateLimiter = 0;
 let lastRequest = new Date();
 
+//AIzaSyBOQTDR0PUStWQDPXzrfRtX-ubFLQU6_8I API key for google maps api
+
 export async function getLocation(query: string) {
     const timeDelta = (new Date()).valueOf() - lastRequest.valueOf();
     lastRequest = new Date();

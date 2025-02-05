@@ -20,5 +20,8 @@ async function fetchWeather() {
 }
 
 function getWeatherImageUrl(iconName: string, size: '2x' | '4x') {
-    return `http://openweathermap.org/img/wn/${iconName}@${size}.png`;
+    if(!iconName || iconName == null) {
+        iconName = '02d'
+    }
+    return `https://openweathermap.org/img/wn/${iconName}@${size}.png`;
 }

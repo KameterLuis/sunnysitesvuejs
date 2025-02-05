@@ -37,7 +37,7 @@ import '@ionic/vue/css/palettes/dark.system.css';
 import './theme/variables.css';
 
 import { addIcons } from 'ionicons';
-import { cafe, cafeOutline, closeOutline, cloudyNight, documentTextOutline, location, lockClosedOutline, logOutOutline, notificationsOutline, searchOutline, settingsOutline, stopwatch, storefrontOutline, sunny } from 'ionicons/icons';
+import { cafe, cafeOutline, closeOutline, cloudyNight, documentTextOutline, location, lockClosedOutline, logOutOutline, notificationsOutline, searchOutline, settingsOutline, star, stopwatch, storefrontOutline, sunny } from 'ionicons/icons';
 
 addIcons({
   'search-outline': searchOutline,
@@ -46,6 +46,7 @@ addIcons({
   'cloudy-night': cloudyNight,
   'stopwatch': stopwatch,
   'cafe': cafe,
+  'star': star,
   'sunny': sunny,
   'close-outline': closeOutline,
   'storefront-outline': storefrontOutline,
