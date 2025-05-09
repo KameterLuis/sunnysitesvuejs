@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { enableLogging } from "firebase/database";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBLYrNuqvZco_bGB6C_yOcJkIjYgWh1l7I",
@@ -13,9 +12,7 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
-//const auth = getAuth(firebaseApp);
 
-enableLogging(true);
+const db = initializeFirestore(firebaseApp, {});
 
 export { db, firebaseApp };

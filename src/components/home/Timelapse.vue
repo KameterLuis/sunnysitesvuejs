@@ -13,7 +13,6 @@
         <ion-datetime
           ref="datetime"
           presentation="date"
-          @ionChange="onDateChange"
           locale="de-DE"
           :value="timelapseDateTime.toISOString()"
           v-model="dateValue"

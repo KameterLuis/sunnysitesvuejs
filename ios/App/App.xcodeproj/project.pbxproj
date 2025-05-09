@@ -14,13 +14,13 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		A118F9642DAA883500392C26 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A118F9632DAA883500392C26 /* GoogleService-Info.plist */; };
 		A1C9CDAF2D8C272200C77A35 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		A1C9CDB12D8C272200C77A35 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		A1C9CDB32D8C272200C77A35 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		A1C9CDB52D8C272200C77A35 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		A1C9CDB72D8C272200C77A35 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		A1C9CDB92D8C272200C77A35 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		A1C9CDBB2D8C27AF00C77A35 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A1C9CDBA2D8C27AF00C77A35 /* GoogleService-Info.plist */; };
 		CBAD18BEA2BA8168C47FD2C8 /* Pods_Sunny_Sites.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 74BE6F1875A9908F4A5B024D /* Pods_Sunny_Sites.framework */; };
 /* End PBXBuildFile section */
 
@@ -36,7 +36,7 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		72638040AA17147A5234A91E /* Pods-Sunny Sites.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sunny Sites.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Sunny Sites/Pods-Sunny Sites.debug.xcconfig"; sourceTree = "<group>"; };
 		74BE6F1875A9908F4A5B024D /* Pods_Sunny_Sites.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sunny_Sites.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1C9CDBA2D8C27AF00C77A35 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		A118F9632DAA883500392C26 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		B9FDE72164914B4AF9FBAB7E /* Pods-Sunny Sites.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sunny Sites.release.xcconfig"; path = "Pods/Target Support Files/Pods-Sunny Sites/Pods-Sunny Sites.release.xcconfig"; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
@@ -89,7 +89,7 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
-				A1C9CDBA2D8C27AF00C77A35 /* GoogleService-Info.plist */,
+				A118F9632DAA883500392C26 /* GoogleService-Info.plist */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -186,7 +186,7 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
-				A1C9CDBB2D8C27AF00C77A35 /* GoogleService-Info.plist in Resources */,
+				A118F9642DAA883500392C26 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,7 +390,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 86F5C35KSK;
 				INFOPLIST_FILE = App/Info.plist;
@@ -401,7 +401,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.6;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sunny.sunnysites;
 				PRODUCT_NAME = "Sunny Sites";
@@ -421,7 +421,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 86F5C35KSK;
 				INFOPLIST_FILE = App/Info.plist;
@@ -432,7 +432,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sunny.sunnysites;
 				PRODUCT_NAME = "Sunny Sites";
 				PROVISIONING_PROFILE_SPECIFIER = "";

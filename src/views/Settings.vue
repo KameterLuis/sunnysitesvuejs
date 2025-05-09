@@ -126,16 +126,11 @@ import { useDocument } from "vuefire";
 const legalRef = doc(collection(db, "Legal"), "iV8EPKXn0nWLZ4fmLzKV");
 const legalTexts = useDocument(legalRef);
 
-watchEffect(() => {
-  console.log("Firebase data:", legalTexts.value);
-});
-
 const isPrivacyOpen = ref(false);
 const isImprintOpen = ref(false);
 
 const openModal = (type) => {
   if (type === "privacy") {
-    console.log(legalTexts.value, legalTexts.privacy);
     isPrivacyOpen.value = true;
   } else {
     isImprintOpen.value = true;

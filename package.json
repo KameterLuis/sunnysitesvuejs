@@ -1,7 +1,7 @@
 {
   "name": "Sunny Sites",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.4",
   "type": "module",
   "scripts": {
     "serve": "vite",
@@ -26,8 +26,11 @@
     "@capacitor/status-bar": "6.0.1",
     "@googlemaps/js-api-loader": "^1.16.8",
     "@googlemaps/places": "^1.8.0",
+    "@ionic/storage": "^4.0.0",
+    "@ionic/storage-angular": "^4.0.0",
     "@ionic/vue": "^8.4.3",
     "@ionic/vue-router": "^8.4.3",
+    "cordova-sqlite-storage": "^7.0.0",
     "dotenv": "^16.4.7",
     "firebase": "^10.13.0",
     "ionicons": "^7.0.0",
@@ -38,6 +41,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2",
+    "@types/node": "^22.15.16",
     "@vitejs/plugin-legacy": "^5.0.0",
     "@vitejs/plugin-vue": "^4.6.2",
     "@vue/compiler-sfc": "^3.5.13",

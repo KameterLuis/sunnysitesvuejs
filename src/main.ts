@@ -39,6 +39,7 @@ import {
 import App from "./App.vue";
 import { firebaseApp } from "./firebaseConfig";
 import "./index.css";
+import "./style/Map.css";
 import router from "./router";
 
 /* Core CSS required for Ionic components to work properly */
@@ -88,6 +89,8 @@ import {
   stopwatch,
   storefrontOutline,
   sunny,
+  bookmarkOutline,
+  bookmark,
 } from "ionicons/icons";
 
 addIcons({
@@ -106,6 +109,8 @@ addIcons({
   "lock-closed-outline": lockClosedOutline,
   "notifications-outline": notificationsOutline,
   "document-text-outline": documentTextOutline,
+  "bookmark-outline": bookmarkOutline,
+  bookmark: bookmark,
 });
 
 const app = createApp(App)
@@ -113,11 +118,7 @@ const app = createApp(App)
   .use(router)
   .use(VueFire, {
     firebaseApp,
-    modules: [
-      VueFireAuth(),
-      VueFireFirestoreOptionsAPI(),
-      VueFireDatabaseOptionsAPI(),
-    ],
+    modules: [VueFireFirestoreOptionsAPI(), VueFireDatabaseOptionsAPI()],
   });
 
 app.component("ion-page", IonPage);

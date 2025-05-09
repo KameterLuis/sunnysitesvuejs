@@ -102,8 +102,8 @@ ion-icon {
 
 <script setup>
 import { Geolocation } from "@capacitor/geolocation";
-import { collection } from "firebase/firestore";
-import { computed, defineEmits, onMounted, ref } from "vue";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { computed, defineEmits, onMounted, ref, watch } from "vue";
 import { useCollection } from "vuefire";
 import { db } from "../../firebaseConfig";
 import LocationCard from "./LocationCard.vue";
@@ -204,25 +204,29 @@ function filterByDistance(recommendations, maxDistance) {
   return recommendations.sort((a, b) => a.distance - b.distance);
 }
 
+const maxDistance = 20;
+
 const filteredCafes = computed(() => {
-  return currentLocation.value.lat ? filterByDistance(cafes.value, 20) : cafes;
+  return currentLocation.value.lat
+    ? filterByDistance(cafes.value, maxDistance)
+    : cafes;
 });
 
 const filteredSunnyCafes = computed(() => {
   return currentLocation.value.lat
-    ? filterByDistance(sunnyCafes.value, 20)
+    ? filterByDistance(sunnyCafes.value, maxDistance)
     : sunnyCafes;
 });
 
 const filteredRestaurants = computed(() => {
   return currentLocation.value.lat
-    ? filterByDistance(restaurants.value, 20)
+    ? filterByDistance(restaurants.value, maxDistance)
     : restaurants;
 });
 
 const filteredSunnyRestaurants = computed(() => {
   return currentLocation.value.lat
-    ? filterByDistance(sunnyRestaurants.value, 20)
+    ? filterByDistance(sunnyRestaurants.value, maxDistance)
     : sunnyRestaurants;
 });
 </script>
