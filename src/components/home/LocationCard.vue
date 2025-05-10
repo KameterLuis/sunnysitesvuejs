@@ -12,8 +12,12 @@
       <ion-icon name="star" size="small"></ion-icon>
       <p class="text-xs">{{ recommendation.rating }} / 5</p>
     </div>
-    <div class="w-[180px] max-h-[150px] mt-3 overflow-hidden">
-      <img :src="recommendation.image" :alt="recommendation.name" />
+    <div class="w-[180px] h-[100px] mt-3 overflow-hidden object-cover">
+      <img
+        class="object-cover w-full h-full"
+        :src="recommendation.image"
+        :alt="recommendation.name"
+      />
     </div>
     <p class="-text--sunny-gray mt-3 text-xs">
       {{ recommendation.description }}
@@ -47,12 +51,13 @@ const goToLocation = () => {
 };
 
 const openWebsite = async () => {
-  await Browser.open({ url: props.recommendation.url });
+  await Browser.open({ url: props.recommendation.website });
 };
 
 const getRoute = async () => {
-  const loc = props.recommendation.location;
-  const end = [loc._long, loc._lat];
+  await Browser.open({ url: props.recommendation.url });
+  /*const loc = props.recommendation.location;
+  const end = [loc.long, loc.lat];
   try {
     const position = await Geolocation.getCurrentPosition();
     const start = [position.coords.longitude, position.coords.latitude];
@@ -60,7 +65,7 @@ const getRoute = async () => {
     await Browser.open({ url: url });
   } catch (error) {
     console.error("Error fetching location:", error);
-  }
+  }*/
 };
 
 const props = defineProps({

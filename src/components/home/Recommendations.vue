@@ -6,14 +6,14 @@
     </div>
     <div
       v-if="
-        (filteredSunnyRestaurants && filteredSunnyRestaurants.length) ||
-        (filteredRestaurants && filteredRestaurants.length)
+        (restaurants && restaurants.length) ||
+        (sunnyRestaurants && sunnyRestaurants.length)
       "
       class="scroll-container w-screen overflow-x-scroll px-8 pb-4"
     >
       <div class="flex space-x-6">
         <div
-          v-for="restaurant in filteredSunnyRestaurants"
+          v-for="restaurant in sunnyRestaurants"
           :key="restaurant.id"
           class="mt-4 flex space-x-6"
         >
@@ -25,7 +25,7 @@
           />
         </div>
         <div
-          v-for="restaurant in filteredRestaurants"
+          v-for="restaurant in restaurants"
           :key="restaurant.id"
           class="mt-4 flex space-x-6 pr-6"
         >
@@ -46,15 +46,12 @@
       <p class="text-xl -text--sunny-gray">Cafés</p>
     </div>
     <div
-      v-if="
-        (filteredSunnyCafes && filteredSunnyCafes.length) ||
-        (filteredCafes && filteredCafes.length)
-      "
+      v-if="(cafes && cafes.length) || (sunnyCafes && sunnyCafes.length)"
       class="scroll-container w-screen overflow-x-scroll px-8 pb-4"
     >
       <div class="flex space-x-6">
         <div
-          v-for="cafe in filteredSunnyCafes"
+          v-for="cafe in sunnyCafes"
           :key="cafe.id"
           class="mt-4 flex space-x-6"
         >
@@ -66,7 +63,7 @@
           />
         </div>
         <div
-          v-for="cafe in filteredCafes"
+          v-for="cafe in cafes"
           :key="cafe.id"
           class="mt-4 flex space-x-6 pr-6"
         >
@@ -102,9 +99,8 @@ ion-icon {
 
 <script setup>
 import { Geolocation } from "@capacitor/geolocation";
-import { collection, getDocs, onSnapshot } from "firebase/firestore";
-import { computed, defineEmits, onMounted, ref, watch } from "vue";
-import { useCollection } from "vuefire";
+import { collection, getDocs } from "firebase/firestore";
+import { defineEmits, onMounted, ref } from "vue";
 import { db } from "../../firebaseConfig";
 import LocationCard from "./LocationCard.vue";
 
@@ -112,19 +108,34 @@ let placesService;
 
 const currentLocation = ref({ lat: null, lon: null });
 
-const restaurantsRef = collection(db, "Restaurants");
-const restaurants = useCollection(restaurantsRef);
-
-const sunnyRestaurantsRef = collection(db, "Sunny Restaurants");
-const sunnyRestaurants = useCollection(sunnyRestaurantsRef);
-
-const cafesRef = collection(db, "Cafes");
-const cafes = useCollection(cafesRef);
-
-const sunnyCafesRef = collection(db, "Sunny Cafes");
-const sunnyCafes = useCollection(sunnyCafesRef);
+const restaurants = ref([]);
+const cafes = ref([]);
+const sunnyRestaurants = ref([]);
+const sunnyCafes = ref([]);
 
 const emit = defineEmits(["goToLocation2"]);
+
+const maxDistance = 20;
+
+const getData = async (collectionName) => {
+  const snap = await getDocs(collection(db, collectionName));
+  const list = snap.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return await filterByDistance(list, maxDistance);
+};
+
+const loadRecommendations = async () => {
+  try {
+    restaurants.value = await getData("Restaurants");
+    cafes.value = await getData("Cafes");
+    sunnyRestaurants.value = await getData("Sunny Restaurants");
+    sunnyCafes.value = await getData("Sunny Cafes");
+  } catch (e) {
+    console.error("Failed to load restaurants:", e);
+  }
+};
 
 onMounted(async () => {
   try {
@@ -136,6 +147,7 @@ onMounted(async () => {
           clearInterval(checkGoogleMaps);
           initGoogle();
           console.log("✅ Google Maps API is now ready!");
+          loadRecommendations();
         }
       }, 500);
     }
@@ -180,53 +192,59 @@ const getLocation = async () => {
   }
 };
 
-function filterByDistance(recommendations, maxDistance) {
-  recommendations = recommendations.filter((recommendation) => {
-    const request = {
-      placeId: recommendation.place_id,
-      fields: ["reviews", "rating"],
-    };
+function getDetailsPromise(request) {
+  return new Promise((resolve, reject) => {
     placesService.getDetails(request, (result, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
-        recommendation.rating = result.rating;
-        recommendation.reviews = result.reviews;
+        resolve(result);
+      } else {
+        reject(new Error(status));
       }
     });
-    const distance = calculateDistance(
-      currentLocation.value.lat,
-      currentLocation.value.lon,
-      recommendation.location._lat,
-      recommendation.location._long
-    );
-    recommendation.distance = distance;
-    return distance <= maxDistance;
   });
-  return recommendations.sort((a, b) => a.distance - b.distance);
 }
 
-const maxDistance = 20;
+async function filterByDistance(recommendations, maxDistance) {
+  const filtered = [];
 
-const filteredCafes = computed(() => {
-  return currentLocation.value.lat
-    ? filterByDistance(cafes.value, maxDistance)
-    : cafes;
-});
+  for (const rec of recommendations) {
+    try {
+      const detail = await getDetailsPromise({
+        placeId: rec.place_id,
+        fields: [
+          "reviews",
+          "rating",
+          "name",
+          "website",
+          "photos",
+          "geometry",
+          "url",
+          "editorial_summary",
+        ],
+      });
 
-const filteredSunnyCafes = computed(() => {
-  return currentLocation.value.lat
-    ? filterByDistance(sunnyCafes.value, maxDistance)
-    : sunnyCafes;
-});
+      rec.rating = detail.rating;
+      rec.reviews = detail.reviews;
+      rec.name = detail.name;
+      rec.url = detail.url;
+      rec.website = detail.website;
+      rec.image = detail.photos?.[0]?.getUrl();
+      rec.location = detail.geometry.location;
+      const distance = calculateDistance(
+        currentLocation.value.lat,
+        currentLocation.value.lon,
+        rec.location.lat(),
+        rec.location.lng()
+      );
+      rec.distance = distance;
 
-const filteredRestaurants = computed(() => {
-  return currentLocation.value.lat
-    ? filterByDistance(restaurants.value, maxDistance)
-    : restaurants;
-});
-
-const filteredSunnyRestaurants = computed(() => {
-  return currentLocation.value.lat
-    ? filterByDistance(sunnyRestaurants.value, maxDistance)
-    : sunnyRestaurants;
-});
+      if (distance <= maxDistance) {
+        filtered.push(rec);
+      }
+    } catch (err) {
+      console.error("PlacesService failed for", rec.place_id, err);
+    }
+  }
+  return filtered;
+}
 </script>
