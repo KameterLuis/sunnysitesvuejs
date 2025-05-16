@@ -38,7 +38,13 @@
                   <p class="text-lg">{{ resultObject.name }}</p>
                   <p class="text-xs">
                     {{ resultObject.type }} -
-                    {{ resultObject.open_now ? "open now" : "closed now" }}
+                    {{
+                      resultObject.open_now == true
+                        ? "open now"
+                        : resultObject.open_now == false
+                        ? "closed now"
+                        : "unknown opening hours"
+                    }}
                   </p>
                 </div>
                 <div class="mr-10">
@@ -116,6 +122,20 @@
               ></ion-icon>
             </ion-button>
           </div>
+          <div class="drop-shadow-lg">
+            <ion-button
+              @click="switchSearchPreference"
+              size="large"
+              shape="round"
+            >
+              <ion-icon
+                class="icon-sidebar-gray"
+                slot="icon-only"
+                size="small"
+                :name="searchPreference + `-outline`"
+              ></ion-icon>
+            </ion-button>
+          </div>
         </div>
         <div class="fixed z-50 bottom-0 w-full">
           <Menu
@@ -126,7 +146,12 @@
         </div>
         <div class="relative w-full h-screen overflow-hidden">
           <div class="w-full h-screen -z-50">
-            <MapboxMap @hideSearchbar="hideSearchbar" ref="mapboxMap" />
+            <MapboxMap
+              @hideSearchbar="hideSearchbar"
+              @searchLocation="goToLocationById"
+              @hideSearchResult="hideSearchResult"
+              ref="mapboxMap"
+            />
           </div>
         </div>
       </div>
@@ -181,6 +206,7 @@ import { onMounted, ref, watch } from "vue";
 import Settings from "./Settings.vue";
 import Favorites from "./Favorites.vue";
 import { removeItem, setItem, exists } from "@/utils/storage";
+import { Toast } from "@capacitor/toast";
 
 let autocompleteService, placesService;
 
@@ -192,8 +218,33 @@ const searchResults = ref(null);
 const askPermission = ref(false);
 const showResult = ref(false);
 const resultObject = ref(null);
+const searchPreference = ref("restaurant");
 
 const searchTerm = ref("");
+
+async function showNativeToast(message, duration = "short") {
+  await Toast.show({ text: message, duration, position: "center" });
+}
+
+const switchSearchPreference = () => {
+  switch (searchPreference.value) {
+    case "restaurant":
+      searchPreference.value = "beer";
+      mapboxMap.value.changePreference("bar");
+      showNativeToast("Showing nearby bars", "long");
+      break;
+    case "beer":
+      searchPreference.value = "cafe";
+      mapboxMap.value.changePreference("cafe");
+      showNativeToast("Showing nearby cafes", "long");
+      break;
+    case "cafe":
+    default:
+      searchPreference.value = "restaurant";
+      mapboxMap.value.changePreference("restaurant");
+      showNativeToast("Showing nearby restaurants", "long");
+  }
+};
 
 const openFavorite = (id) => {
   showFavorites.value = false;
@@ -220,7 +271,9 @@ const updateFavorite = async () => {
 const getRoute = async () => {
   const end = [resultObject.value.lng, resultObject.value.lat];
   try {
-    const position = await Geolocation.getCurrentPosition();
+    const position = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+    });
     const start = [position.coords.longitude, position.coords.latitude];
     const url = `https://www.google.com/maps/dir/?api=1&origin=${start[1]},${start[0]}&destination=${end[1]},${end[0]}`;
     await Browser.open({ url: url });
@@ -246,6 +299,7 @@ onMounted(async () => {
   Geolocation.checkPermissions().then((permission) => {
     if (permission.location == "denied") {
       askPermission.value = true;
+      console.log("Location permission denied");
     }
   });
   try {
@@ -270,7 +324,7 @@ const initGoogle = () => {
   placesService = new google.maps.places.PlacesService(dummy);
 };
 
-const goToLocationById = (placeId) => {
+const getResult = (placeId, zoom) => {
   const request = {
     placeId: placeId,
     fields: [
@@ -294,7 +348,9 @@ const goToLocationById = (placeId) => {
         name: result.name,
         ratings_total: result.user_ratings_total,
         rating: result.rating,
-        open_now: result.opening_hours.open_now,
+        open_now: result.opening_hours
+          ? result.opening_hours.open_now
+          : "unknown opening hours",
         website: result.website,
         type: result.types[0],
         lat: lat,
@@ -303,10 +359,14 @@ const goToLocationById = (placeId) => {
         id: placeId,
         address: result.formatted_address,
       };
-      mapboxMap.value.setCoordinates(lng, lat);
-      mapboxMap.value.updateMarker(lng, lat);
+      mapboxMap.value.setCoordinates(lng, lat, zoom);
+      //mapboxMap.value.updateMarker(lng, lat);
     }
   });
+};
+
+const goToLocationById = (placeId, zoom = true) => {
+  getResult(placeId, zoom);
 };
 
 const searchLocation = (event) => {
@@ -315,55 +375,8 @@ const searchLocation = (event) => {
   if (elm.nodeName == "P") elm = elm.parentNode;
   showSearchBar.value = false;
   const placeId = searchResults.value[elm.id].place_id;
-  const request = {
-    placeId: placeId,
-    fields: [
-      "name",
-      "geometry",
-      "user_ratings_total",
-      "rating",
-      "opening_hours",
-      "website",
-      "types",
-      "formatted_address",
-    ],
-  };
-  placesService.getDetails(request, async (result, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      const lat = result.geometry.location.lat();
-      const lng = result.geometry.location.lng();
-      const isFav = await exists(placeId);
-      showResult.value = true;
-      resultObject.value = {
-        name: result.name,
-        ratings_total: result.user_ratings_total,
-        rating: result.rating,
-        open_now: result.opening_hours.open_now,
-        website: result.website,
-        type: result.types[0],
-        lat: lat,
-        lng: lng,
-        favorite: isFav,
-        id: placeId,
-        address: result.formatted_address,
-      };
-      mapboxMap.value.setCoordinates(lng, lat);
-      mapboxMap.value.updateMarker(lng, lat);
-    }
-  });
+  getResult(placeId, true);
 };
-
-/*const onSearch = (event) => {
-  if (!event || !event.detail) return;
-  autocompleteService.getPlacePredictions(
-    { input: event.detail.value },
-    (predictions, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        searchResults.value = predictions;
-      }
-    }
-  );
-};*/
 
 watch(searchTerm, (value) => {
   if (!value) return;
@@ -376,6 +389,10 @@ watch(searchTerm, (value) => {
     }
   );
 });
+
+const hideSearchResult = () => {
+  showResult.value = false;
+};
 
 const hideSearchbar = () => {
   showSearchBar.value = false;

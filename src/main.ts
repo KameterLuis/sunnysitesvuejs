@@ -91,6 +91,8 @@ import {
   sunny,
   bookmarkOutline,
   bookmark,
+  restaurantOutline,
+  beerOutline,
 } from "ionicons/icons";
 
 addIcons({
@@ -110,6 +112,8 @@ addIcons({
   "notifications-outline": notificationsOutline,
   "document-text-outline": documentTextOutline,
   "bookmark-outline": bookmarkOutline,
+  "restaurant-outline": restaurantOutline,
+  "beer-outline": beerOutline,
   bookmark: bookmark,
 });
 

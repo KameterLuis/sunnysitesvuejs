@@ -41,7 +41,6 @@
 
 <script setup>
 import { Browser } from "@capacitor/browser";
-import { Geolocation } from "@capacitor/geolocation";
 import { defineEmits } from "vue";
 
 const emit = defineEmits(["goToLocation1"]);

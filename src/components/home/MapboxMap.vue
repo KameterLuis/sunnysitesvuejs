@@ -6,32 +6,60 @@
 import BuildingShadows from "@/utils/BuildingShadows";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Geolocation } from "@capacitor/geolocation";
-
 import { defineEmits, onMounted, ref } from "vue";
+import { waitForGoogleMaps, loadPOIsInView } from "../../utils/googleMapsUtils";
+import { computeShadowQuads } from "../../utils/sunCalculator";
+import {
+  add3DBuildingsLayer,
+  addDebugLayer,
+  addPOILayer,
+} from "../../utils/mapUtils";
+import { Geolocation } from "@capacitor/geolocation";
+import {
+  getPlacesAndStreetOutline,
+  findFacadeEdge,
+  extrudeSeatingZone,
+} from "../../utils/placesUtils";
+import { booleanIntersects } from "@turf/turf";
 
-const emit = defineEmits(["hideSearchbar"]);
+const emit = defineEmits(["hideSearchbar", "searchLocation"]);
 
 const mapContainer = ref(null);
 let map = null;
 let marker = null;
+let searchPreference = ref("restaurant");
 let positionMarker = null;
 let longitude = ref(0);
 let latitude = ref(0);
 let buildingShadows = null;
 let placesService;
+let features = null;
+let date = new Date();
 
-const setCoordinates = (newLongitude, newLatitude) => {
+const setCoordinates = (newLongitude, newLatitude, zoom = true) => {
   longitude.value = newLongitude;
   latitude.value = newLatitude;
   if (map) {
-    map.easeTo({
-      center: [longitude.value, latitude.value],
-      zoom: 16,
-      duration: 1500,
-      bearing: 0,
-    });
+    if (zoom) {
+      map.easeTo({
+        center: [longitude.value, latitude.value],
+        zoom: 16,
+        duration: 1500,
+        bearing: 0,
+      });
+    } else {
+      map.easeTo({
+        center: [longitude.value, latitude.value],
+        duration: 1500,
+        bearing: 0,
+      });
+    }
   }
+};
+
+const changePreference = (preference) => {
+  searchPreference.value = preference;
+  updatePOIS();
 };
 
 const updatePositionMarker = (long, lat) => {
@@ -52,10 +80,48 @@ const updateMarker = (long, lat) => {
   }
 };
 
-const setDate = (date) => {
-  buildingShadows.setDate(date);
-  map.triggerRepaint();
-  updatePOIShading();
+function debounce(fn, wait = 100) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), wait);
+  };
+}
+
+const updateShadows = () => {
+  if (!features || !date) return;
+
+  features.forEach((place, i) => {
+    const { bestBuilding: B, bestRoad: R } = place;
+    if (!B || !R) return;
+
+    const façade = findFacadeEdge(B, R);
+    const seatingZone = extrudeSeatingZone(façade, R, 2);
+
+    const quads = computeShadowQuads(B, date);
+    map.getSource(`shadow-quads-src-${i}`).setData({
+      type: "FeatureCollection",
+      features: quads,
+    });
+
+    let inShade = quads.some((q) => booleanIntersects(q, seatingZone));
+    if (quads.length === 0) inShade = true;
+    place.properties.inShade = inShade;
+  });
+
+  map.getSource("pois").setData({
+    type: "FeatureCollection",
+    features: features,
+  });
+};
+
+const debouncedUpdateShadows = debounce(updateShadows, 100);
+
+const setDate = (dt) => {
+  date = dt;
+  if (!buildingShadows) return;
+  buildingShadows.setDate(dt);
+  debouncedUpdateShadows();
 };
 
 const initGoogle = () => {
@@ -63,146 +129,23 @@ const initGoogle = () => {
   placesService = new google.maps.places.PlacesService(dummy);
 };
 
-const textSearch = (request) => {
-  if (!placesService) return;
-  return new Promise((resolve, reject) => {
-    placesService.textSearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        resolve(results);
-      } else {
-        reject(status);
-      }
-    });
-  });
-};
-
-function updatePOIShading() {
-  // 1) Hide POIs so we sample only shadows
-  map.setLayoutProperty("pois-symbols", "visibility", "none");
-
-  // 2) Once everything’s drawn…
-  map.once("render", () => {
-    const gl = map.painter.context.gl;
-    const dpr = window.devicePixelRatio;
-    const dbw = gl.drawingBufferWidth;
-    const dbh = gl.drawingBufferHeight;
-    const cssW = map.getContainer().clientWidth;
-    const cssH = map.getContainer().clientHeight;
-    const src = map.getSource("pois");
-    const features = src._data.features;
-
-    features.forEach((feat) => {
-      const [lng, lat] = feat.geometry.coordinates;
-      // 3) Only bother if it’s in the viewport
-      if (!map.getBounds().contains([lng, lat])) {
-        feat.properties.inShade = false;
-        return;
-      }
-      // 4) Project to CSS-pixel coords
-      const p = map.project([lng, lat]);
-      let cssX = Math.floor(p.x);
-      let cssY = Math.floor(p.y);
-      // clamp CSS coords
-      cssX = Math.min(Math.max(cssX, 0), cssW - 1);
-      cssY = Math.min(Math.max(cssY, 0), cssH - 1);
-
-      // 5) Convert to WebGL backbuffer coords
-      let x = Math.floor(cssX * dpr);
-      let y = Math.floor(dbh - cssY * dpr);
-
-      // clamp backbuffer coords
-      x = Math.min(Math.max(x, 0), dbw - 1);
-      y = Math.min(Math.max(y, 0), dbh - 1);
-
-      // DEBUG: inspect a few to verify mapping
-      console.log(
-        `POI '${feat.properties.name}' → CSS(${cssX},${cssY}) → GL(${x},${y})`
-      );
-
-      // 6) read the pixel under it
-      const pixel = new Uint8Array(4);
-      gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-
-      // 7) set inShade based on the shadow-alpha
-      feat.properties.inShade = pixel[3] > 128;
-      console.debug(
-        `  RGBA: [${pixel.join(", ")}], inShade=${feat.properties.inShade}`
-      );
-    });
-
-    // 8) write the updated flags back
-    src.setData({ type: "FeatureCollection", features });
-
-    // 9) show the POIs again
-    map.setLayoutProperty("pois-symbols", "visibility", "visible");
-  });
-
-  // 10) force a redraw so the render event fires
-  map.triggerRepaint();
-}
-
-const loadPOIsInView = async () => {
-  console.log("LOADING POIS IN VIEW");
-  const mbBounds = map.getBounds();
-  const sw = mbBounds.getSouthWest();
-  const ne = mbBounds.getNorthEast();
-  const gBounds = new google.maps.LatLngBounds(
-    new google.maps.LatLng(sw.lat, sw.lng),
-    new google.maps.LatLng(ne.lat, ne.lng)
-  );
-
-  try {
-    const [cafes, restaurants] = await Promise.all([
-      textSearch({ bounds: gBounds, query: "cafe" }),
-      textSearch({ bounds: gBounds, query: "restaurant" }),
-    ]);
-
-    const places = [...cafes, ...restaurants].reduce((acc, p) => {
-      if (!acc.some((el) => el.place_id === p.place_id)) acc.push(p);
-      return acc;
-    }, []);
-
-    const features = places.slice(0, 20).map((p) => ({
-      // cap to 20
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [p.geometry.location.lng(), p.geometry.location.lat()],
-      },
-      properties: {
-        place_id: p.place_id,
-        name: p.name,
-        inShade: false,
-      },
-    }));
-
-    map.getSource("pois").setData({
-      type: "FeatureCollection",
-      features,
-    });
-
-    updatePOIShading();
-  } catch (e) {
-    console.error("Places textSearch failed:", e);
+const updatePOIS = async () => {
+  features = await loadPOIsInView(map, placesService, searchPreference.value);
+  if (features) {
+    getPlacesAndStreetOutline(map, features, date);
   }
 };
 
 onMounted(() => {
-  try {
-    if (window.google && window.google.maps) {
-      initGoogle();
-    } else {
-      const checkGoogleMaps = setInterval(() => {
-        if (window.google && window.google.maps) {
-          clearInterval(checkGoogleMaps);
-          initGoogle();
-        }
-      }, 500);
-    }
-  } catch (error) {
-    console.error("❌ Error loading Google Maps API", error);
-  }
+  waitForGoogleMaps()
+    .then(initGoogle)
+    .then(initMap)
+    .catch((err) => {
+      console.error("❌ Google Maps failed to load", err);
+    });
+});
 
+function initMap() {
   mapboxgl.accessToken =
     "pk.eyJ1Ijoic3VubnlzaXRlcyIsImEiOiJjbTQ4OGlvejcwaW1oMmpzb3h5czZuYzB5In0.quI2qPhurNfI1_j-mfuyDw";
   map = new mapboxgl.Map({
@@ -212,112 +155,61 @@ onMounted(() => {
     zoom: 16,
     preserveDrawingBuffer: true,
   });
+
   buildingShadows = new BuildingShadows(new Date());
 
-  map.on("moveend", () => {
-    emit("hideSearchbar");
-    loadPOIsInView();
-  });
-
-  /*map.on("wheel", () => {
-    emit("hideSearchbar");
-    loadPOIsInView();
-  })
-  
-  map.on("boxzoomstart", () => {
-    emit("hideSearchbar");
-    loadPOIsInView();
-  });
-  ;*/
-
-  map.on("click", () => {
-    emit("hideSearchbar");
-  });
-
-  map.on("load", async () => {
-    if (map.getLayer("building")) {
-      map.removeLayer("building");
-    }
-    map.addLayer(
-      {
-        id: "3d-buildings",
-        source: "composite",
-        "source-layer": "building",
-        type: "fill-extrusion",
-        minzoom: 15,
-        paint: {
-          "fill-extrusion-color": "#ddd",
-          "fill-extrusion-height": ["number", ["get", "height"], 5],
-          "fill-extrusion-base": ["number", ["get", "min_height"], 0],
-          "fill-extrusion-opacity": 1,
-        },
-      },
-      "road-label"
-    );
+  map.once("load", () => {
+    add3DBuildingsLayer(map);
+    console.log("[Mapbox] 3D buildings layer added");
     map.addLayer(buildingShadows, "3d-buildings");
-    map.addSource("pois", {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
-    });
-
-    map.loadImage("/map/sonnig.png", (err, img) => {
-      if (!err && !map.hasImage("sun-icon")) map.addImage("sun-icon", img);
-    });
-    map.loadImage("/map/schattig.png", (err, img) => {
-      if (!err && !map.hasImage("shade-icon")) map.addImage("shade-icon", img);
-    });
-
-    map.addLayer({
-      id: "pois-symbols",
-      type: "symbol",
-      source: "pois",
-      layout: {
-        "icon-image": ["case", ["get", "inShade"], "shade-icon", "sun-icon"],
-        "icon-allow-overlap": true,
-        "icon-size": ["interpolate", ["linear"], ["zoom"], 12, 0.05, 16, 0.2],
-      },
-    });
-    map.resize();
-
-    const position = await Geolocation.getCurrentPosition();
-    latitude.value = position.coords.latitude;
-    longitude.value = position.coords.longitude;
-    updatePositionMarker(longitude.value, latitude.value);
-    setTimeout(() => {
-      setCoordinates(longitude.value, latitude.value);
-      setTimeout(() => {
-        loadPOIsInView();
-      }, 3000);
+    console.log("[Mapbox] Shadow layer added");
+    addDebugLayer(
+      map,
+      "streets-debug",
+      "vector",
+      "mapbox://mapbox.mapbox-streets-v8"
+    );
+    addPOILayer(map, emit);
+    console.log("[Mapbox] POI layer added");
+    geolocateAndCenter();
+    setTimeout(async () => {
+      updatePOIS();
     }, 1000);
   });
-
+  map.on("click", () => {
+    emit("hideSearchResult");
+  });
+  map.on("moveend", async () => {
+    //emit("hideSearchbar");
+    updatePOIS();
+  });
   map.on("resize", () => {
     map.removeLayer("building-shadows");
     map.addLayer(buildingShadows, "3d-buildings");
   });
+}
 
-  map.on("click", "pois-symbols", (e) => {
-    const feat = e.features[0];
-    const coords = feat.geometry.coordinates;
-    const { name, place_id, inShade } = feat.properties;
-
-    new mapboxgl.Popup()
-      .setLngLat(coords)
-      .setHTML(
-        `
-      <strong>${name}</strong><br/>
-      ID: ${place_id}<br/>
-      ${inShade ? "In the shade" : "In the sun"}
-    `
-      )
-      .addTo(map);
-  });
-});
+async function geolocateAndCenter() {
+  try {
+    const pos = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+    });
+    const coords = [pos.coords.longitude, pos.coords.latitude];
+    latitude.value = coords[1];
+    longitude.value = coords[0];
+    updatePositionMarker(longitude.value, latitude.value);
+    setCoordinates(longitude.value, latitude.value);
+    console.log("[Mapbox] Set map to center");
+  } catch (e) {
+    console.warn("Geolocation failed", e);
+  }
+}
 
 defineExpose({
   setCoordinates,
   setDate,
   updateMarker,
+  changePreference,
 });
 </script>
 

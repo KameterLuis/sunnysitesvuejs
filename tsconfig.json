@@ -22,7 +22,8 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/firebaseConfig.ts",
-    "src/utils/storage.ts"
+    "src/utils/storage.ts",
+    "src/utils/googleMapsUtils.js"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

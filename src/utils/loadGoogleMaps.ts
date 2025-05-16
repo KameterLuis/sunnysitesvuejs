@@ -28,7 +28,7 @@ export function loadGoogleMaps(): Promise<void> {
     };
 
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&callback=initGoogleMaps`;
     script.async = true;
     script.defer = true;
     script.onerror = (error) => {
