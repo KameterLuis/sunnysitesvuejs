@@ -7,7 +7,7 @@ import BuildingShadows from "@/utils/BuildingShadows";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { defineEmits, onMounted, ref } from "vue";
-import { waitForGoogleMaps, loadPOIsInView } from "../../utils/googleMapsUtils";
+import { loadPOIsInView } from "../../utils/googleMapsUtils";
 import { computeShadowQuads } from "../../utils/sunCalculator";
 import {
   add3DBuildingsLayer,
@@ -32,7 +32,6 @@ let positionMarker = null;
 let longitude = ref(0);
 let latitude = ref(0);
 let buildingShadows = null;
-let placesService;
 let features = null;
 let date = new Date();
 
@@ -59,7 +58,7 @@ const setCoordinates = (newLongitude, newLatitude, zoom = true) => {
 
 const changePreference = (preference) => {
   searchPreference.value = preference;
-  updatePOIS();
+  //updatePOIS();
 };
 
 const updatePositionMarker = (long, lat) => {
@@ -121,28 +120,24 @@ const setDate = (dt) => {
   date = dt;
   if (!buildingShadows) return;
   buildingShadows.setDate(dt);
-  debouncedUpdateShadows();
-};
-
-const initGoogle = () => {
-  const dummy = document.createElement("div");
-  placesService = new google.maps.places.PlacesService(dummy);
+  //debouncedUpdateShadows();
 };
 
 const updatePOIS = async () => {
-  features = await loadPOIsInView(map, placesService, searchPreference.value);
+  features = await loadPOIsInView(map, searchPreference.value);
   if (features) {
     getPlacesAndStreetOutline(map, features, date);
   }
 };
 
 onMounted(() => {
-  waitForGoogleMaps()
+  initMap();
+  /*waitForGoogleMaps()
     .then(initGoogle)
     .then(initMap)
     .catch((err) => {
       console.error("❌ Google Maps failed to load", err);
-    });
+    });*/
 });
 
 function initMap() {
@@ -150,7 +145,7 @@ function initMap() {
     "pk.eyJ1Ijoic3VubnlzaXRlcyIsImEiOiJjbTQ4OGlvejcwaW1oMmpzb3h5czZuYzB5In0.quI2qPhurNfI1_j-mfuyDw";
   map = new mapboxgl.Map({
     container: mapContainer.value,
-    style: "mapbox://styles/mapbox/streets-v11",
+    style: "mapbox://styles/mapbox/streets-v12",
     center: [longitude.value, latitude.value],
     zoom: 16,
     preserveDrawingBuffer: true,
@@ -173,7 +168,7 @@ function initMap() {
     console.log("[Mapbox] POI layer added");
     geolocateAndCenter();
     setTimeout(async () => {
-      updatePOIS();
+      //updatePOIS();
     }, 1000);
   });
   map.on("click", () => {

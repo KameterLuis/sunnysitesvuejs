@@ -207,6 +207,7 @@ import Settings from "./Settings.vue";
 import Favorites from "./Favorites.vue";
 import { removeItem, setItem, exists } from "@/utils/storage";
 import { Toast } from "@capacitor/toast";
+import { textSearch } from "@/utils/googleMapsUtils";
 
 let autocompleteService, placesService;
 
@@ -338,7 +339,9 @@ const getResult = (placeId, zoom) => {
       "formatted_address",
     ],
   };
-  placesService.getDetails(request, async (result, status) => {
+  const results = textSearch(request);
+  console.log(results);
+  /*placesService.getDetails(request, async (result, status) => {
     if (status === google.maps.places.PlacesServiceStatus.OK) {
       const lat = result.geometry.location.lat();
       const lng = result.geometry.location.lng();
@@ -362,7 +365,7 @@ const getResult = (placeId, zoom) => {
       mapboxMap.value.setCoordinates(lng, lat, zoom);
       //mapboxMap.value.updateMarker(lng, lat);
     }
-  });
+  });*/
 };
 
 const goToLocationById = (placeId, zoom = true) => {
