@@ -29,6 +29,21 @@
               </div>
             </div>
           </div>
+          <div
+            v-if="!showResult && showSearchHere"
+            :class="
+              showSearchBar
+                ? 'fixed mt-16 left-0 w-full px-8 flex justify-center'
+                : 'fixed left-0 w-full px-8 flex justify-center'
+            "
+          >
+            <button
+              class="bg-white -text--sunny-orange rounded-full px-4 py-2 text-xs shadow-lg"
+              @click="searchHere"
+            >
+              search here
+            </button>
+          </div>
           <div v-if="showResult" class="fixed w-full left-0 px-8 md:px-14">
             <div
               class="bg-gray-100 opacity-85 px-4 py-4 rounded-lg mb-4 shadow-lg"
@@ -150,6 +165,7 @@
               @hideSearchbar="hideSearchbar"
               @searchLocation="goToLocationById"
               @hideSearchResult="hideSearchResult"
+              @searchHereNow="updateSearchHere"
               ref="mapboxMap"
             />
           </div>
@@ -219,6 +235,7 @@ const askPermission = ref(false);
 const showResult = ref(false);
 const resultObject = ref(null);
 const searchPreference = ref("restaurant");
+const showSearchHere = ref(false);
 
 const searchTerm = ref("");
 
@@ -244,6 +261,15 @@ const switchSearchPreference = () => {
       mapboxMap.value.changePreference("restaurant");
       showNativeToast("Showing nearby restaurants", "long");
   }
+};
+
+const searchHere = () => {
+  mapboxMap.value.changePreference(searchPreference.value);
+  showSearchHere.value = false;
+};
+
+const updateSearchHere = () => {
+  showSearchHere.value = true;
 };
 
 const openFavorite = (id) => {

@@ -22,7 +22,7 @@ import {
 } from "../../utils/placesUtils";
 import { booleanIntersects } from "@turf/turf";
 
-const emit = defineEmits(["hideSearchbar", "searchLocation"]);
+const emit = defineEmits(["hideSearchbar", "searchLocation", "searchHereNow"]);
 
 const mapContainer = ref(null);
 let map = null;
@@ -174,14 +174,18 @@ function initMap() {
     geolocateAndCenter();
     setTimeout(async () => {
       updatePOIS();
-    }, 1000);
+    }, 2000);
   });
   map.on("click", () => {
     emit("hideSearchResult");
   });
+  const startUpTimer = Date.now();
   map.on("moveend", async () => {
-    //emit("hideSearchbar");
-    updatePOIS();
+    if (Date.now() - startUpTimer > 3000) {
+      //emit("hideSearchbar");
+      //updatePOIS();
+      emit("searchHereNow");
+    }
   });
   map.on("resize", () => {
     map.removeLayer("building-shadows");
