@@ -26,7 +26,7 @@
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
     <!--script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOQTDR0PUStWQDPXzrfRtX-ubFLQU6_8I&libraries=places,geometry"
+      src="https://maps.googleapis.com/maps/api/js?key=xyz&libraries=places,geometry"
       async
     ></script-->
     <!--script>
@@ -65,7 +65,7 @@
           ? console.warn(p + " only loads once. Ignoring:", g)
           : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
       })({
-        key: "AIzaSyBOQTDR0PUStWQDPXzrfRtX-ubFLQU6_8I",
+        key: "",
         v: "weekly",
         // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
       });

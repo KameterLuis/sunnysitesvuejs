@@ -146,8 +146,7 @@ onMounted(() => {
 });
 
 function initMap() {
-  mapboxgl.accessToken =
-    "pk.eyJ1Ijoic3VubnlzaXRlcyIsImEiOiJjbTQ4OGlvejcwaW1oMmpzb3h5czZuYzB5In0.quI2qPhurNfI1_j-mfuyDw";
+  mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_MAPS_API_KEY;
   map = new mapboxgl.Map({
     container: mapContainer.value,
     style: "mapbox://styles/mapbox/streets-v11",
