@@ -1,6 +1,50 @@
 import { Geolocation } from "@capacitor/geolocation";
 import { ref } from "vue";
-import { OneWeather } from "./weather.model";
+
+interface Weather {
+  id: number;
+  main: string;
+  description: string;
+  icon: string;
+}
+
+interface FeelsLike {
+  day: number;
+  evening: number;
+  morning: number;
+  night: number;
+}
+
+interface Temperature extends FeelsLike {
+  max: number;
+  min: number;
+}
+
+interface CurrentWeather {
+  feels_like: number;
+  humidity: number;
+  sunrise: number;
+  sunset: number;
+  temperature: number;
+  weather: Weather[];
+  wind_speed: number;
+}
+
+interface DailyWeather {
+  feels_like: FeelsLike;
+  humidity: number;
+  sunrise: number;
+  sunset: number;
+  temp: Temperature;
+  weather: Weather[];
+  wind_speed: number;
+}
+
+export interface OneWeather {
+  current: CurrentWeather;
+  daily: DailyWeather[];
+}
+
 const weatherUrl =
   "https://api.openweathermap.org/data/2.5/forecast?units=metric&appid=" +
   import.meta.env.VITE_OPENWEATHER_APP_ID;

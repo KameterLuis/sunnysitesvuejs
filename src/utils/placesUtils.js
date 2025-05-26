@@ -62,19 +62,6 @@ export function getPlacesAndStreetOutline(map, places, date) {
       data: { type: "FeatureCollection", features: quads },
     });
 
-    /*const fillId = `shadow-quads-fill-${i}`;
-    if (!map.getLayer(fillId)) {
-      map.addLayer({
-        id: fillId,
-        type: "fill",
-        source: `shadow-quads-src-${i}`,
-        paint: {
-          "fill-color": "#000",
-          "fill-opacity": 0.3,
-        },
-      });
-    }*/
-
     place.bestBuilding = bestB;
     place.bestRoad = bestR;
   });

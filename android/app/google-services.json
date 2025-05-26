@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "321699843935",
+    "project_id": "sunny-sites-517e5",
+    "storage_bucket": "sunny-sites-517e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:321699843935:android:263ce3079079d76209f0ea",
+        "android_client_info": {
+          "package_name": "com.sunny.sunnysites"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMOj0OUx7Sz_WlmxCP0hJCDd6WrD9J5Js"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBLYrNuqvZco_bGB6C_yOcJkIjYgWh1l7I",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "sunny-sites-517e5.firebaseapp.com",
   projectId: "sunny-sites-517e5",
   storageBucket: "sunny-sites-517e5.appspot.com",

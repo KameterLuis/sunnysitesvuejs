@@ -6,8 +6,8 @@
 import BuildingShadows from "@/utils/BuildingShadows";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { defineEmits, onMounted, ref } from "vue";
-import { waitForGoogleMaps, loadPOIsInView } from "../../utils/googleMapsUtils";
+import { defineEmits, onBeforeUnmount, onMounted, ref } from "vue";
+import { loadPOIsInView } from "../../utils/mapboxAPI";
 import { computeShadowQuads } from "../../utils/sunCalculator";
 import {
   add3DBuildingsLayer,
@@ -124,25 +124,20 @@ const setDate = (dt) => {
   debouncedUpdateShadows();
 };
 
-const initGoogle = () => {
-  const dummy = document.createElement("div");
-  placesService = new google.maps.places.PlacesService(dummy);
-};
-
 const updatePOIS = async () => {
-  features = await loadPOIsInView(map, placesService, searchPreference.value);
+  features = await loadPOIsInView(
+    map,
+    import.meta.env.VITE_MAPBOX_MAPS_API_KEY,
+    searchPreference.value
+  );
   if (features) {
     getPlacesAndStreetOutline(map, features, date);
   }
+  debouncedUpdateShadows();
 };
 
 onMounted(() => {
-  waitForGoogleMaps()
-    .then(initGoogle)
-    .then(initMap)
-    .catch((err) => {
-      console.error("❌ Google Maps failed to load", err);
-    });
+  initMap();
 });
 
 function initMap() {
@@ -169,6 +164,7 @@ function initMap() {
       "mapbox://mapbox.mapbox-streets-v8"
     );
     addPOILayer(map, emit);
+    map.resize();
     console.log("[Mapbox] POI layer added");
     geolocateAndCenter();
     setTimeout(async () => {
@@ -181,8 +177,6 @@ function initMap() {
   const startUpTimer = Date.now();
   map.on("moveend", async () => {
     if (Date.now() - startUpTimer > 3000) {
-      //emit("hideSearchbar");
-      //updatePOIS();
       emit("searchHereNow");
     }
   });
@@ -192,10 +186,35 @@ function initMap() {
   });
 }
 
+const watchId = ref();
+
+const startTracking = async () => {
+  watchId.value = await Geolocation.watchPosition(
+    {
+      enableHighAccuracy: true,
+      minimumUpdateInterval: 1000,
+      distanceFilter: 2,
+    },
+    (position, err) => {
+      if (err) {
+        console.error("watch error", err);
+        return;
+      }
+      if (position) {
+        latitude.value = position.coords.latitude;
+        longitude.value = position.coords.longitude;
+        updatePositionMarker(longitude.value, latitude.value);
+      }
+    }
+  );
+};
+
 async function geolocateAndCenter() {
   try {
     const pos = await Geolocation.getCurrentPosition({
       enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 10000,
     });
     const coords = [pos.coords.longitude, pos.coords.latitude];
     latitude.value = coords[1];
@@ -203,10 +222,15 @@ async function geolocateAndCenter() {
     updatePositionMarker(longitude.value, latitude.value);
     setCoordinates(longitude.value, latitude.value);
     console.log("[Mapbox] Set map to center");
+    startTracking();
   } catch (e) {
     console.warn("Geolocation failed", e);
   }
 }
+
+onBeforeUnmount(async () => {
+  if (watchId.value) Geolocation.clearWatch({ id: watchId.value });
+});
 
 defineExpose({
   setCoordinates,

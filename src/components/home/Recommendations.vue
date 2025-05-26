@@ -138,29 +138,8 @@ const loadRecommendations = async () => {
 };
 
 onMounted(async () => {
-  try {
-    if (window.google && window.google.maps) {
-      initGoogle();
-    } else {
-      const checkGoogleMaps = setInterval(() => {
-        if (window.google && window.google.maps) {
-          clearInterval(checkGoogleMaps);
-          initGoogle();
-          console.log("✅ Google Maps API is now ready!");
-          loadRecommendations();
-        }
-      }, 500);
-    }
-  } catch (error) {
-    console.error("❌ Error loading Google Maps API", error);
-  }
+  //getLocation();
 });
-
-const initGoogle = () => {
-  const dummy = document.createElement("div");
-  placesService = new window.google.maps.places.PlacesService(dummy);
-  getLocation();
-};
 
 const goToLocation1 = (location) => {
   emit("goToLocation2", location);
@@ -194,36 +173,13 @@ const getLocation = async () => {
   }
 };
 
-function getDetailsPromise(request) {
-  return new Promise((resolve, reject) => {
-    placesService.getDetails(request, (result, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        resolve(result);
-      } else {
-        reject(new Error(status));
-      }
-    });
-  });
-}
-
 async function filterByDistance(recommendations, maxDistance) {
   const filtered = [];
 
   for (const rec of recommendations) {
     try {
-      const detail = await getDetailsPromise({
-        placeId: rec.place_id,
-        fields: [
-          "reviews",
-          "rating",
-          "name",
-          "website",
-          "photos",
-          "geometry",
-          "url",
-          "editorial_summary",
-        ],
-      });
+      //TODO
+      console.log(rec);
 
       rec.rating = detail.rating;
       rec.reviews = detail.reviews;

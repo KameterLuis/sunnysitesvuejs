@@ -40,7 +40,7 @@ export function addPOILayer(map, emit) {
   });
 
   map.on("click", "pois-symbols", (e) => {
-    const pid = e.features[0].properties.place_id;
+    const pid = e.features[0].properties;
     emit("hideSearchbar");
     setTimeout(() => {
       emit("searchLocation", pid, false);

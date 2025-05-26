@@ -13,19 +13,4 @@
 @import "@/style/SplashScreen.css";
 </style>
 
-<script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { loadGoogleMaps } from "@/utils/loadGoogleMaps";
-
-const googleMapsReady = ref(false);
-
-onMounted(async () => {
-  try {
-    await loadGoogleMaps();
-    googleMapsReady.value = true;
-    console.log("✅ Google Maps API is fully loaded!");
-  } catch (error) {
-    console.error("❌ Error loading Google Maps API", error);
-  }
-});
-</script>
+<script setup lang="ts"></script>

@@ -17,20 +17,24 @@
             >
               <div
                 :id="index"
-                @click="searchLocation"
+                @click="goToSuggestedLocation"
                 class="bg-gray-100 px-4 py-4 rounded-lg mb-4 shadow-lg"
               >
                 <p class="text-lg">
-                  {{ place.structured_formatting.main_text }}
+                  {{ place.name }}
                 </p>
                 <p class="text-xs">
-                  {{ place.structured_formatting.secondary_text }}
+                  {{ place.address }}
                 </p>
               </div>
             </div>
           </div>
           <div
-            v-if="!showResult && showSearchHere"
+            v-if="
+              !showResult &&
+              showSearchHere &&
+              (showSearchBar ? !searchResults : true)
+            "
             :class="
               showSearchBar
                 ? 'fixed mt-16 left-0 w-full px-8 flex justify-center'
@@ -52,7 +56,11 @@
                 <div>
                   <p class="text-lg">{{ resultObject.name }}</p>
                   <p class="text-xs">
-                    {{ resultObject.type }} -
+                    {{ resultObject.address }}
+                  </p>
+                  <p class="text-xs">
+                    {{ resultObject.type }}
+                    <!--/*  -
                     {{
                       resultObject.open_now == true
                         ? "open now"
@@ -60,6 +68,7 @@
                         ? "closed now"
                         : "unknown opening hours"
                     }}
+                    */-->
                   </p>
                 </div>
                 <div class="mr-10">
@@ -79,7 +88,7 @@
                   </ion-button>
                 </div>
               </div>
-              <div class="flex items-center space-x-2 mt-2">
+              <!--div class="flex items-center space-x-2 mt-2">
                 <ion-icon name="star" size="small"></ion-icon>
                 <p class="text-xs">
                   {{ resultObject.rating }} / 5 ({{
@@ -87,14 +96,14 @@
                   }}
                   ratings)
                 </p>
-              </div>
+              </div-->
               <div class="flex gap-x-2 mt-4"></div>
-              <button
+              <!--button
                 class="-bg--sunny-orange text-white rounded-lg px-4 py-2 text-base"
                 @click="openWebsite"
               >
                 website
-              </button>
+              </button-->
               <button
                 class="-bg--sunny-orange text-white ml-2 rounded-lg px-4 py-2 text-base"
                 @click="getRoute"
@@ -139,7 +148,8 @@
           </div>
           <div class="drop-shadow-lg">
             <ion-button
-              @click="switchSearchPreference"
+              type="button"
+              @click.stop.prevent="switchSearchPreference"
               size="large"
               shape="round"
             >
@@ -163,7 +173,7 @@
           <div class="w-full h-screen -z-50">
             <MapboxMap
               @hideSearchbar="hideSearchbar"
-              @searchLocation="goToLocationById"
+              @searchLocation="goToLocationWithData"
               @hideSearchResult="hideSearchResult"
               @searchHereNow="updateSearchHere"
               ref="mapboxMap"
@@ -223,14 +233,15 @@ import Settings from "./Settings.vue";
 import Favorites from "./Favorites.vue";
 import { removeItem, setItem, exists } from "@/utils/storage";
 import { Toast } from "@capacitor/toast";
+import { v4 as uuidv4 } from "uuid";
+import { getFeatureById } from "@/utils/mapboxAPI";
 
-let autocompleteService, placesService;
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_MAPS_API_KEY;
 
 const showSearchBar = ref(false);
 const showSettings = ref(false);
 const showFavorites = ref(false);
 const mapboxMap = ref(null);
-const searchResults = ref(null);
 const askPermission = ref(false);
 const showResult = ref(false);
 const resultObject = ref(null);
@@ -238,6 +249,56 @@ const searchPreference = ref("restaurant");
 const showSearchHere = ref(false);
 
 const searchTerm = ref("");
+const searchResults = ref([]);
+
+let sessionToken = null;
+let activeAbort = null;
+let debounceTimer = null;
+
+function resetSession() {
+  sessionToken = uuidv4();
+}
+
+watch(searchTerm, (val) => {
+  clearTimeout(debounceTimer);
+
+  if (!val) {
+    searchResults.value = [];
+    return;
+  }
+
+  debounceTimer = setTimeout(async () => {
+    if (activeAbort) activeAbort.abort();
+    activeAbort = new AbortController();
+
+    const qs = new URLSearchParams({
+      access_token: MAPBOX_TOKEN,
+      session_token: sessionToken,
+      q: val,
+      limit: "5",
+    });
+
+    const url = `https://api.mapbox.com/search/searchbox/v1/suggest?${qs}`;
+
+    try {
+      const res = await fetch(url, { signal: activeAbort.signal });
+      if (!res.ok) throw new Error(await res.text());
+      const json = await res.json();
+
+      searchResults.value = (json.suggestions || []).map((s) => {
+        return {
+          name: s.name,
+          place_id: s.mapbox_id,
+          address: s.full_address,
+        };
+      });
+    } catch (err) {
+      if (err.name !== "AbortError") console.error("suggest error", err);
+    } finally {
+      activeAbort = null;
+    }
+  }, 300);
+});
 
 async function showNativeToast(message, duration = "short") {
   await Toast.show({ text: message, duration, position: "center" });
@@ -272,9 +333,29 @@ const updateSearchHere = () => {
   showSearchHere.value = true;
 };
 
-const openFavorite = (id) => {
+const openFavorite = async (id) => {
+  resetSession();
+  const feature = await getFeatureById(
+    id,
+    import.meta.env.VITE_MAPBOX_MAPS_API_KEY,
+    sessionToken
+  );
+  const lng = feature.properties.coordinates.longitude;
+  const lat = feature.properties.coordinates.latitude;
+  const isFav = true;
+  resultObject.value = {
+    name: feature.properties.name,
+    type: feature.properties.maki,
+    lat: lat,
+    lng: lng,
+    favorite: isFav,
+    id: feature.properties.mapbox_id,
+    address: feature.properties.full_address,
+  };
+  showResult.value = true;
+  mapboxMap.value.setCoordinates(lng, lat, false);
+  mapboxMap.value.updateMarker(lng, lat);
   showFavorites.value = false;
-  goToLocationById(id);
 };
 
 const updateFavorite = async () => {
@@ -319,6 +400,9 @@ const handleDateChange = (newDate) => {
 const triggerSearch = () => {
   showSearchBar.value = !showSearchBar.value;
   showResult.value = false;
+  if (showSearchBar.value == true) {
+    resetSession();
+  }
 };
 
 onMounted(async () => {
@@ -328,93 +412,53 @@ onMounted(async () => {
       console.log("Location permission denied");
     }
   });
-  try {
-    if (window.google && window.google.maps) {
-      initGoogle();
-    } else {
-      const checkGoogleMaps = setInterval(() => {
-        if (window.google && window.google.maps) {
-          clearInterval(checkGoogleMaps);
-          initGoogle();
-        }
-      }, 500);
-    }
-  } catch (error) {
-    console.error("❌ Error loading Google Maps API", error);
-  }
 });
 
-const initGoogle = () => {
-  autocompleteService = new window.google.maps.places.AutocompleteService();
-  const dummy = document.createElement("div");
-  placesService = new google.maps.places.PlacesService(dummy);
-};
-
-const getResult = (placeId, zoom) => {
-  const request = {
-    placeId: placeId,
-    fields: [
-      "name",
-      "geometry",
-      "user_ratings_total",
-      "rating",
-      "opening_hours",
-      "website",
-      "types",
-      "formatted_address",
-    ],
+const goToLocationWithData = async (place, zoom = true) => {
+  const isFav = await exists(place.place_id);
+  const lng = Number(place.lng);
+  const lat = Number(place.lat);
+  resultObject.value = {
+    name: place.name,
+    type: place.placeType,
+    lat: lat,
+    lng: lng,
+    favorite: isFav,
+    id: place.place_id,
+    address: place.address,
   };
-  placesService.getDetails(request, async (result, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      const lat = result.geometry.location.lat();
-      const lng = result.geometry.location.lng();
-      const isFav = await exists(placeId);
-      showResult.value = true;
-      resultObject.value = {
-        name: result.name,
-        ratings_total: result.user_ratings_total,
-        rating: result.rating,
-        open_now: result.opening_hours
-          ? result.opening_hours.open_now
-          : "unknown opening hours",
-        website: result.website,
-        type: result.types[0],
-        lat: lat,
-        lng: lng,
-        favorite: isFav,
-        id: placeId,
-        address: result.formatted_address,
-      };
-      mapboxMap.value.setCoordinates(lng, lat, zoom);
-      //mapboxMap.value.updateMarker(lng, lat);
-    }
-  });
+  showResult.value = true;
+  mapboxMap.value.setCoordinates(lng, lat, zoom);
 };
 
-const goToLocationById = (placeId, zoom = true) => {
-  getResult(placeId, zoom);
-};
-
-const searchLocation = (event) => {
+const goToSuggestedLocation = async (event) => {
   if (!event || !event.target) return;
   let elm = event.target;
   if (elm.nodeName == "P") elm = elm.parentNode;
   showSearchBar.value = false;
-  const placeId = searchResults.value[elm.id].place_id;
-  getResult(placeId, true);
-};
-
-watch(searchTerm, (value) => {
-  if (!value) return;
-  autocompleteService.getPlacePredictions(
-    { input: value },
-    (predictions, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        searchResults.value = predictions;
-      }
-    }
+  const id = searchResults.value[elm.id].place_id;
+  const feature = await getFeatureById(
+    id,
+    import.meta.env.VITE_MAPBOX_MAPS_API_KEY,
+    sessionToken
   );
-});
+  const lng = feature.properties.coordinates.longitude;
+  const lat = feature.properties.coordinates.latitude;
+  const isFav = await exists(feature.properties.mapbox_id);
+  resultObject.value = {
+    name: feature.properties.name,
+    type: feature.properties.maki,
+    lat: lat,
+    lng: lng,
+    favorite: isFav,
+    id: feature.properties.mapbox_id,
+    address: feature.properties.full_address,
+  };
+  showResult.value = true;
+  resetSession();
+  mapboxMap.value.setCoordinates(lng, lat, false);
+  mapboxMap.value.updateMarker(lng, lat);
+};
 
 const hideSearchResult = () => {
   showResult.value = false;

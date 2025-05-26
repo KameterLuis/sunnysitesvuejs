@@ -140,8 +140,6 @@ import Recommendations from "./Recommendations.vue";
 import Timelapse from "./Timelapse.vue";
 import Weather from "./Weather.vue";
 
-//AIzaSyBOQTDR0PUStWQDPXzrfRtX-ubFLQU6_8I API key for google maps api
-
 const emit = defineEmits(["goToLocation3", "updateDate", "hideSearchbar"]);
 
 const handleDateChange = (newDate) => {
@@ -155,6 +153,8 @@ const goToLocation2 = (location) => {
 const setLocation = async () => {
   const coordinates = await Geolocation.getCurrentPosition({
     enableHighAccuracy: true,
+    timeout: 30000,
+    maximumAge: 10000,
   });
   const long = coordinates.coords.longitude;
   const lat = coordinates.coords.latitude;
