@@ -38,7 +38,7 @@
             :class="
               showSearchBar
                 ? 'fixed mt-16 left-0 w-full px-8 flex justify-center'
-                : 'fixed left-0 w-full px-8 flex justify-center'
+                : 'fixed mt-3 left-0 w-full px-8 flex justify-center'
             "
           >
             <button
