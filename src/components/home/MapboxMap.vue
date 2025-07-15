@@ -9,6 +9,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { defineEmits, onBeforeUnmount, onMounted, ref } from "vue";
 import { loadPOIsInView } from "../../utils/mapboxAPI";
 import { computeShadowQuads } from "../../utils/sunCalculator";
+import { Toast } from "@capacitor/toast";
 import {
   add3DBuildingsLayer,
   addDebugLayer,
@@ -32,7 +33,6 @@ let positionMarker = null;
 let longitude = ref(0);
 let latitude = ref(0);
 let buildingShadows = null;
-let placesService;
 let features = null;
 let date = new Date();
 
@@ -73,6 +73,9 @@ const updatePositionMarker = (long, lat) => {
 };
 
 const updateMarker = (long, lat) => {
+  if (!long || !lat) {
+    if (marker) marker.remove();
+  }
   if (!marker) {
     marker = new mapboxgl.Marker().setLngLat([long, lat]).addTo(map);
   } else {
@@ -124,6 +127,48 @@ const setDate = (dt) => {
   debouncedUpdateShadows();
 };
 
+async function showNativeToast(message, duration = "short") {
+  await Toast.show({ text: message, duration, position: "center" });
+}
+
+const addFeature = (feature, type) => {
+  let newFeature = {
+    type: "Feature",
+    id: feature.id,
+    geometry: {
+      type: "Point",
+      coordinates: [feature.lng, feature.lat],
+    },
+    properties: {
+      lng: feature.lng,
+      lat: feature.lat,
+      place_id: feature.id,
+      name: feature.name,
+      inShade: false,
+      placeType: type,
+      website: "",
+      address: feature.address,
+      opening_hours: "",
+    },
+  };
+  if (features && features.length) {
+    features.push(newFeature);
+  } else {
+    features = [newFeature];
+  }
+
+  const fc = { type: "FeatureCollection", features };
+  const src = map.getSource("pois");
+  if (!src) {
+    console.warn('Source "pois" not found, skipping POI load');
+    return;
+  }
+  src.setData(fc);
+
+  getPlacesAndStreetOutline(map, features, date);
+  debouncedUpdateShadows();
+};
+
 const updatePOIS = async () => {
   features = await loadPOIsInView(
     map,
@@ -132,6 +177,8 @@ const updatePOIS = async () => {
   );
   if (features) {
     getPlacesAndStreetOutline(map, features, date);
+  } else {
+    showNativeToast(`No ${searchPreference.value} nearby`, "long");
   }
   debouncedUpdateShadows();
 };
@@ -149,6 +196,7 @@ function initMap() {
     zoom: 16,
     preserveDrawingBuffer: true,
   });
+  map.addControl(new mapboxgl.AttributionControl(), "top-left");
 
   buildingShadows = new BuildingShadows(new Date());
 
@@ -237,6 +285,7 @@ defineExpose({
   setDate,
   updateMarker,
   changePreference,
+  addFeature,
 });
 </script>
 

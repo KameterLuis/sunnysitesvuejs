@@ -70,6 +70,9 @@
                     }}
                     */-->
                   </p>
+                  <p class="text-xs">
+                    Has outside seating: {{ resultObject.outdoor_seating }}
+                  </p>
                 </div>
                 <div class="mr-10">
                   <ion-button
@@ -231,7 +234,7 @@ import { Geolocation } from "@capacitor/geolocation";
 import { onMounted, ref, watch } from "vue";
 import Settings from "./Settings.vue";
 import Favorites from "./Favorites.vue";
-import { removeItem, setItem, exists } from "@/utils/storage";
+import { removeItem, setItem, exists, getAllItems } from "@/utils/storage";
 import { Toast } from "@capacitor/toast";
 import { v4 as uuidv4 } from "uuid";
 import { getFeatureById } from "@/utils/mapboxAPI";
@@ -354,7 +357,8 @@ const openFavorite = async (id) => {
   };
   showResult.value = true;
   mapboxMap.value.setCoordinates(lng, lat, false);
-  mapboxMap.value.updateMarker(lng, lat);
+  //mapboxMap.value.updateMarker(lng, lat);
+  mapboxMap.value.changePreference(searchPreference.value);
   showFavorites.value = false;
 };
 
@@ -418,6 +422,12 @@ const goToLocationWithData = async (place, zoom = true) => {
   const isFav = await exists(place.place_id);
   const lng = Number(place.lng);
   const lat = Number(place.lat);
+  let seatingString = "unknown";
+  if (place.outdoor_seating === true) {
+    seatingString = "yes";
+  } else if (place.outdoor_seating === false) {
+    seatingString = "no";
+  }
   resultObject.value = {
     name: place.name,
     type: place.placeType,
@@ -426,6 +436,7 @@ const goToLocationWithData = async (place, zoom = true) => {
     favorite: isFav,
     id: place.place_id,
     address: place.address,
+    outdoor_seating: seatingString,
   };
   showResult.value = true;
   mapboxMap.value.setCoordinates(lng, lat, zoom);
@@ -445,6 +456,12 @@ const goToSuggestedLocation = async (event) => {
   const lng = feature.properties.coordinates.longitude;
   const lat = feature.properties.coordinates.latitude;
   const isFav = await exists(feature.properties.mapbox_id);
+  let seatingString = "unknown";
+  if (feature.properties.outdoor_seating === true) {
+    seatingString = "yes";
+  } else if (feature.properties.outdoor_seating === false) {
+    seatingString = "no";
+  }
   resultObject.value = {
     name: feature.properties.name,
     type: feature.properties.maki,
@@ -453,11 +470,14 @@ const goToSuggestedLocation = async (event) => {
     favorite: isFav,
     id: feature.properties.mapbox_id,
     address: feature.properties.full_address,
+    outdoor_seating: seatingString,
   };
   showResult.value = true;
   resetSession();
   mapboxMap.value.setCoordinates(lng, lat, false);
-  mapboxMap.value.updateMarker(lng, lat);
+  setTimeout(() => {
+    mapboxMap.value.addFeature(resultObject.value, searchPreference.value);
+  }, 1500);
 };
 
 const hideSearchResult = () => {

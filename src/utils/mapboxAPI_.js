@@ -1,4 +1,4 @@
-import { addSeating, addSeatingSingle } from "./overpass";
+import { addSeating } from "./overpass";
 
 function haversineMetres(lat1, lng1, lat2, lng2) {
   const R = 6371000,
@@ -29,10 +29,8 @@ export async function getFeatureById(id, token, sessionToken) {
   if (!res.ok)
     throw new Error(`Retrieve failed: ${res.status} ${await res.text()}`);
 
-  const json = await res.json();
-  const feature = json.features[0];
-  const withSeating = await addSeatingSingle(feature);
-  return withSeating;
+  const json = await res.json(); // GeoJSON FeatureCollection
+  return json.features[0]; // the single Feature object
 }
 
 export async function loadPOIsInView(
@@ -77,6 +75,8 @@ export async function loadPOIsInView(
     return;
   }
 
+  await addSeating(raw, map.getBounds());
+
   const inView = raw.filter((f) => {
     const [lng, lat] = f.geometry.coordinates;
     return (
@@ -92,12 +92,7 @@ export async function loadPOIsInView(
 
   const places = Array.from(unique.values()).slice(0, 20);
 
-  const placesWithSeating = await addSeating(places, map.getBounds());
-  const filteredSunnyPlaces = placesWithSeating.filter(
-    (f) => f.properties.outdoor_seating === true
-  );
-
-  const features = filteredSunnyPlaces.map((f) => {
+  const features = places.map((f) => {
     let website = "";
     let opening_hours = "";
     try {
@@ -120,7 +115,6 @@ export async function loadPOIsInView(
         name: f.properties.name,
         inShade: false,
         placeType: searchPreference,
-        outdoor_seating: f.properties.outdoor_seating,
         website: website,
         address: f.properties.full_address,
         opening_hours: opening_hours,
