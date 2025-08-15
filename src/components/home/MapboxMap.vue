@@ -23,7 +23,12 @@ import {
 } from "../../utils/placesUtils";
 import { booleanIntersects } from "@turf/turf";
 
-const emit = defineEmits(["hideSearchbar", "searchLocation", "searchHereNow"]);
+const emit = defineEmits([
+  "hideSearchbar",
+  "searchLocation",
+  "searchHereNow",
+  "updateNumLocations",
+]);
 
 const mapContainer = ref(null);
 let map = null;
@@ -173,7 +178,8 @@ const updatePOIS = async () => {
   features = await loadPOIsInView(
     map,
     import.meta.env.VITE_MAPBOX_MAPS_API_KEY,
-    searchPreference.value
+    searchPreference.value,
+    emit
   );
   if (features) {
     getPlacesAndStreetOutline(map, features, date);
@@ -239,7 +245,7 @@ const watchId = ref();
 const startTracking = async () => {
   watchId.value = await Geolocation.watchPosition(
     {
-      enableHighAccuracy: true,
+      enableHighAccuracy: false,
       minimumUpdateInterval: 1000,
       distanceFilter: 2,
     },
@@ -260,7 +266,7 @@ const startTracking = async () => {
 async function geolocateAndCenter() {
   try {
     const pos = await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
+      enableHighAccuracy: false,
       timeout: 30000,
       maximumAge: 10000,
     });

@@ -162,7 +162,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 const getLocation = async () => {
   try {
     const position = await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
+      enableHighAccuracy: false,
     });
     currentLocation.value = {
       lat: position.coords.latitude,

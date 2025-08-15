@@ -152,7 +152,7 @@ const goToLocation2 = (location) => {
 
 const setLocation = async () => {
   const coordinates = await Geolocation.getCurrentPosition({
-    enableHighAccuracy: true,
+    enableHighAccuracy: false,
     timeout: 30000,
     maximumAge: 10000,
   });

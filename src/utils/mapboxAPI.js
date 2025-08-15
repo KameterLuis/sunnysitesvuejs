@@ -38,7 +38,8 @@ export async function getFeatureById(id, token, sessionToken) {
 export async function loadPOIsInView(
   map,
   accessToken,
-  searchPreference = "restaurant"
+  searchPreference = "restaurant",
+  emit
 ) {
   const b = map.getBounds();
   const sw = b.getSouthWest();
@@ -74,6 +75,7 @@ export async function loadPOIsInView(
   if (!raw.length) {
     console.warn("No POIs found in view");
     map.getSource("pois")?.setData({ type: "FeatureCollection", features: [] });
+    emit("updateNumLocations", 0);
     return;
   }
 
@@ -96,6 +98,9 @@ export async function loadPOIsInView(
   const filteredSunnyPlaces = placesWithSeating.filter(
     (f) => f.properties.outdoor_seating === true
   );
+
+  emit("updateNumLocations", filteredSunnyPlaces.length);
+  console.log(filteredSunnyPlaces.length);
 
   const features = filteredSunnyPlaces.map((f) => {
     let website = "";

@@ -30,23 +30,38 @@
             </div>
           </div>
           <div
-            v-if="
-              !showResult &&
-              showSearchHere &&
-              (showSearchBar ? !searchResults : true)
-            "
             :class="
               showSearchBar
                 ? 'fixed mt-16 left-0 w-full px-8 flex justify-center'
                 : 'fixed mt-3 left-0 w-full px-8 flex justify-center'
             "
           >
-            <button
-              class="bg-white -text--sunny-orange rounded-full px-4 py-2 text-xs shadow-lg"
-              @click="searchHere"
-            >
-              search here
-            </button>
+            <div>
+              <div
+                v-if="!showResult && (showSearchBar ? !searchResults : true)"
+              >
+                <button
+                  class="bg-white -text--sunny-orange rounded-full px-4 py-2 text-xs shadow-lg"
+                >
+                  {{ numLocations }} sunny locations here
+                </button>
+              </div>
+              <div
+                class="mt-2 w-full flex justify-center"
+                v-if="
+                  !showResult &&
+                  showSearchHere &&
+                  (showSearchBar ? !searchResults : true)
+                "
+              >
+                <button
+                  class="bg-white -text--sunny-orange rounded-full px-4 py-2 text-xs shadow-lg"
+                  @click="searchHere"
+                >
+                  search here
+                </button>
+              </div>
+            </div>
           </div>
           <div v-if="showResult" class="fixed w-full left-0 px-8 md:px-14">
             <div
@@ -179,6 +194,7 @@
               @searchLocation="goToLocationWithData"
               @hideSearchResult="hideSearchResult"
               @searchHereNow="updateSearchHere"
+              @updateNumLocations="updateNumLocations"
               ref="mapboxMap"
             />
           </div>
@@ -250,6 +266,7 @@ const showResult = ref(false);
 const resultObject = ref(null);
 const searchPreference = ref("restaurant");
 const showSearchHere = ref(false);
+const numLocations = ref(0);
 
 const searchTerm = ref("");
 const searchResults = ref([]);
@@ -383,7 +400,8 @@ const getRoute = async () => {
   const end = [resultObject.value.lng, resultObject.value.lat];
   try {
     const position = await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
+      enableHighAccuracy: false,
+      maximumAge: 30000,
     });
     const start = [position.coords.longitude, position.coords.latitude];
     const url = `https://www.google.com/maps/dir/?api=1&origin=${start[1]},${start[0]}&destination=${end[1]},${end[0]}`;
@@ -417,6 +435,10 @@ onMounted(async () => {
     }
   });
 });
+
+const updateNumLocations = (num) => {
+  numLocations.value = num;
+};
 
 const goToLocationWithData = async (place, zoom = true) => {
   const isFav = await exists(place.place_id);
