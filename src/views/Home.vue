@@ -7,6 +7,7 @@
             <ion-searchbar
               :debounce="1000"
               v-model="searchTerm"
+              show-clear-button="never"
               class="custom"
               placeholder="Location"
             ></ion-searchbar>
@@ -243,17 +244,17 @@
 </style>
 
 <script setup>
-import MapboxMap from "@/components/home/MapboxMap.vue";
+import MapboxMap from "@/components/home/MapboxMap_old.vue";
 import Menu from "@/components/home/Menu.vue";
+import { getFeatureById } from "@/utils/mapboxAPI";
+import { exists, removeItem, setItem } from "@/utils/storage";
 import { Browser } from "@capacitor/browser";
 import { Geolocation } from "@capacitor/geolocation";
-import { onMounted, ref, watch } from "vue";
-import Settings from "./Settings.vue";
-import Favorites from "./Favorites.vue";
-import { removeItem, setItem, exists, getAllItems } from "@/utils/storage";
 import { Toast } from "@capacitor/toast";
 import { v4 as uuidv4 } from "uuid";
-import { getFeatureById } from "@/utils/mapboxAPI";
+import { onMounted, ref, watch } from "vue";
+import Favorites from "./Favorites.vue";
+import Settings from "./Settings.vue";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_MAPS_API_KEY;
 
