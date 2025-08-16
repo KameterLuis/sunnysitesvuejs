@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   server: {
     cleartext: true,
   },
+  android: { adjustMarginsForEdgeToEdge: "auto" },
 };
 
 export default config;
